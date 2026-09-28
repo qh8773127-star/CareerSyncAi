@@ -16,7 +16,11 @@ export async function createUser(data: unknown) {
       where: { email: userValidation.data.email },
     });
     if (existingUser) {
-      return { success: false, error: "Email already exist!" };
+      return { success: false, 
+      code: "DUPLICATE_RECORD",
+      field: "email",
+      message: "Email already exists!"
+      };
     }
     const newUser = await prisma.user.create({
       data: userValidation.data,

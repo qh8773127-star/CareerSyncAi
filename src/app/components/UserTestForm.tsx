@@ -49,11 +49,11 @@ export default function UserTestForm() {
           name: "",
           email: "",
         });
-      } else if (result?.error === "Email already exist!") {
+      } else if (result.code === "DUPLICATE_RECORD") {
         
         setError("email", {
           type: "server",
-          message: result.error,
+          message: result.message,
         });
       } else {
         setMessage({ text: `Error: ${result?.error}`, type: "error" });
