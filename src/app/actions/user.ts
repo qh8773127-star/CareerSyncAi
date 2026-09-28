@@ -11,10 +11,19 @@ export async function createUser(data: unknown) {
     return { success: false, error: "Invalid data format" };
   }
   try {
+
+    const existingUser = await prisma.user.findUnique({
+      where: { email: userValidation.data.email },
+    });
+    if (existingUser) {
+      return { success: false, error: "Email already exist!" };
+    }
     const newUser = await prisma.user.create({
       data: userValidation.data,
     });
     return { success: true, user: newUser };
+
+
   } catch (error) {
     console.error("Database Error:", error);
     return { success: false, error: "Database failed to create user" };
