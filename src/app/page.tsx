@@ -17,7 +17,7 @@ export default async function Home() {
         </div>
       ) : (
         <div className="p-5 border-2 border-red-500 rounded">
-          <p className="mb-4">You are not logged in.</p>
+          <p className="mb-4 flex justify-center ">You are not logged in.</p>
           <SignIn />
         </div>
       )}

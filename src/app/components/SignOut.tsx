@@ -1,12 +1,9 @@
-import { signOut } from "../auth";
+import { logoutUser } from "../actions/auth-actions";
 
 const SignOut = () => {
   return (
     <form
-      action={async () => {
-        "use server";
-        await signOut();
-      }}
+      action={logoutUser}
     >
       <button type="submit" className="bg-red-500 text-white px-4 py-2 rounded">
         Logout
