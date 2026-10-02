@@ -3,6 +3,7 @@ import { prisma } from "@/app/lib/prisma";
 import { redirect } from "next/navigation";
 import AddJobForm from "../components/AddJobForm";
 import SignOut from "../components/SignOut";
+import JobActionButtons from "../components/JobActionButtons";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -69,7 +70,7 @@ export default async function DashboardPage() {
 
                 <div className="mt-4 md:mt-0 flex items-center gap-4">
                   <span className="text-xs font-bold px-3 py-1.5 rounded-md bg-indigo-50 text-indigo-700 ring-1 ring-inset ring-indigo-600/10 uppercase tracking-wider">
-                    {job.status}
+                    <JobActionButtons jobId={job.id} currentStatus={job.status}/>
                   </span>
                   <span className="text-sm text-slate-400 font-medium">
                     {job.createdAt.toLocaleDateString("en-US", {

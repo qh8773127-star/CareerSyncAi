@@ -32,7 +32,7 @@ const AddJobForm = () => {
       const response = await createJob(data);
       if (response.success) {
         setMessage({
-          text: "Success: Job strictly saved in database!",
+          text: "Success: Job strictly saved",
           type: "success",
         });
         reset();
