@@ -82,7 +82,7 @@ const AddJobForm = () => {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="bg-blue-600 text-white p-2 rounded disabled:bg-gray-400 disabled:cursor-not-allowed"
+          className="bg-blue-600 text-white p-2 cursor-pointer rounded disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
           {isSubmitting ? "Submitting..." : "Job submit"}
         </button>
