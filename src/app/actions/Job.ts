@@ -5,12 +5,32 @@ import { revalidatePath } from "next/cache";
 import { auth } from "../auth";
 import { prisma } from "../lib/prisma";
 
+//Authentication
 async function requireAuth() {
   const session = await auth();
   if (!session?.user?.id) {
     throw new Error("Unauthorized Action: User is not explicitly logged in.");
   }
-  return session.user.id; // Strictly sirf user ID return karega
+  return session.user.id;
+}
+
+async function verifyJobOwnership(jobId: string) {
+  const userId = await requireAuth();
+
+  const job = await prisma.job.findUnique({
+    where: { id: jobId },
+    select: { userId: true }, // Performance optimization
+  });
+
+  if (!job) {
+    throw new Error("Action Failed: Job does not exist.");
+  }
+
+  if (job.userId !== userId) {
+    throw new Error("Security Alert: Unauthorized IDOR manipulation blocked.");
+  }
+
+  return userId;
 }
 
 //createJOb
@@ -44,14 +64,7 @@ export async function createJob(formData: unknown) {
 //DeleteJOb
 export async function deleteJob(jobId: string) {
   try {
-    const userId = await requireAuth();
-    const job = await prisma.job.findUnique({
-      where: { id: jobId },
-    });
-
-    if (!job || job.userId !== userId) {
-      return { success: false, error: "Job not found or you lack ownership" };
-    }
+    await verifyJobOwnership(jobId);
 
     await prisma.job.delete({
       where: { id: jobId },
@@ -70,14 +83,7 @@ export async function UpdateJObStatus(
   newStatus: "PENDING" | "INTERVIEW" | "REJECTED" | "HIRED",
 ) {
   try {
-    const userId = await requireAuth();
-    const job = await prisma.job.findUnique({
-      where: { id: jobId },
-    });
-
-    if (!job || job.userId !== userId) {
-      return { success: false, error: "Job not found or you lack ownership" };
-    } //IDOR (Insecure Direct Object Reference) Protection
+    await verifyJobOwnership(jobId);
 
     await prisma.job.update({
       where: { id: jobId },
@@ -94,7 +100,7 @@ export async function UpdateJObStatus(
 //StatusOfJOb
 export async function getJobStats() {
   try {
-   const userId=await requireAuth();
+    const userId = await requireAuth();
 
     const statusCounts = await prisma.job.groupBy({
       by: ["status"],
