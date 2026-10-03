@@ -39,7 +39,7 @@ const JobActionButtons = ({ jobId, currentStatus }: JobActionProps) => {
       <button
         onClick={handleDelete}
         disabled={isPending} // Job delete hote waqt button explicitly lock ho jayega
-        className="text-xs font-bold w-20 py-1.5 rounded-md bg-red-50 text-red-700 ring-1 ring-inset ring-red-600/10 hover:bg-red-100 transition-colors uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center"
+        className="text-xs font-bold cursor-pointer w-20 py-1.5 rounded-md bg-red-50 text-red-700 ring-1 ring-inset ring-red-600/10 hover:bg-red-100 transition-colors uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center"
       >
         {isPending ? "..." : "Delete"}
       </button>

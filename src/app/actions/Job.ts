@@ -4,6 +4,7 @@ import { createJobSchema } from "../lib/validations";
 import { revalidatePath } from "next/cache";
 import { auth } from "../auth";
 import { prisma } from "../lib/prisma";
+import { Prisma } from "@prisma/client";
 
 //Authentication
 async function requireAuth() {
@@ -137,4 +138,51 @@ export async function getJobStats() {
       HIRED: 0,
     };
   }
+}
+
+export async function getFilteredJobs({
+  userId,
+  query,
+  status,
+  page = 1,
+  itemsPerPage = 10
+}: {
+  userId: string;
+  query?: string;
+  status?: string;
+  page?: number;
+  itemsPerPage?: number;
+}) {
+  const whereClause: Prisma.JobWhereInput = {
+    userId: userId,
+  };
+
+  if (status && status !== "ALL") {
+    whereClause.status = status as Prisma.JobWhereInput["status"];
+  }
+
+  if (query?.trim()) {
+    whereClause.OR = [
+      { title: { contains: query.trim(), mode: "insensitive" } },
+      { company: { contains: query.trim(), mode: "insensitive" } },
+    ];
+  }
+
+  const skip = (page - 1) * itemsPerPage;
+
+  const [jobs, totalJobsCount] = await Promise.all([
+    prisma.job.findMany({
+      where: whereClause,
+      orderBy: { createdAt: "desc" },
+      take: itemsPerPage,
+      skip: skip,
+    }),
+    prisma.job.count({
+      where: whereClause,
+    })
+  ]);
+
+  const totalPages = Math.ceil(totalJobsCount / itemsPerPage);
+
+  return { jobs, totalPages };
 }
