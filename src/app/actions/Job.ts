@@ -5,12 +5,17 @@ import { revalidatePath } from "next/cache";
 import { auth } from "../auth";
 import { prisma } from "../lib/prisma";
 
-//createJOb
-export async function createJob(formData: unknown) {
+async function requireAuth() {
   const session = await auth();
   if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized access. Session not found." };
+    throw new Error("Unauthorized Action: User is not explicitly logged in.");
   }
+  return session.user.id; // Strictly sirf user ID return karega
+}
+
+//createJOb
+export async function createJob(formData: unknown) {
+  const userId = await requireAuth();
 
   const validation = createJobSchema.safeParse(formData);
 
@@ -23,7 +28,7 @@ export async function createJob(formData: unknown) {
       data: {
         title: validation.data.title,
         company: validation.data.company,
-        userId: session.user.id,
+        userId: userId,
       },
     });
 
@@ -39,16 +44,12 @@ export async function createJob(formData: unknown) {
 //DeleteJOb
 export async function deleteJob(jobId: string) {
   try {
-    const session = await auth();
-    if (!session?.user?.id) {
-      return { success: false, error: "Unauthorized request" };
-    }
-
+    const userId = await requireAuth();
     const job = await prisma.job.findUnique({
       where: { id: jobId },
     });
 
-    if (!job || job.userId !== session.user.id) {
+    if (!job || job.userId !== userId) {
       return { success: false, error: "Job not found or you lack ownership" };
     }
 
@@ -69,18 +70,15 @@ export async function UpdateJObStatus(
   newStatus: "PENDING" | "INTERVIEW" | "REJECTED" | "HIRED",
 ) {
   try {
-    const session = await auth();
-    if (!session?.user?.id) {
-      return { success: false, error: "Unauthorized request" };
-    }
+    const userId = await requireAuth();
     const job = await prisma.job.findUnique({
       where: { id: jobId },
     });
 
-    if (!job || job.userId !== session.user.id) {   
+    if (!job || job.userId !== userId) {
       return { success: false, error: "Job not found or you lack ownership" };
     } //IDOR (Insecure Direct Object Reference) Protection
-    
+
     await prisma.job.update({
       where: { id: jobId },
       data: { status: newStatus },
@@ -96,18 +94,15 @@ export async function UpdateJObStatus(
 //StatusOfJOb
 export async function getJobStats() {
   try {
-    const session = await auth();
-    if (!session?.user?.id) {
-      throw new Error("Unauthorized request");
-    }
+   const userId=await requireAuth();
 
     const statusCounts = await prisma.job.groupBy({
-      by: ['status'],
+      by: ["status"],
       where: {
-        userId: session.user.id, 
+        userId: userId,
       },
       _count: {
-        status: true,//for count the objects
+        status: true, //for count the objects
       },
     });
 
@@ -122,11 +117,10 @@ export async function getJobStats() {
     statusCounts.forEach((item) => {
       const count = item._count.status;
       stats[item.status as keyof typeof stats] = count;
-      stats.total += count; 
+      stats.total += count;
     });
 
     return stats;
-
   } catch (error) {
     console.error("Stats Engine Crash:", error);
     return {
