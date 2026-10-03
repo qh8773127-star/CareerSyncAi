@@ -4,7 +4,7 @@ import SignIn from "./components/SignIn";
 
 export default async function HomePage() {
   const session = await auth();
-
+  
   if (session?.user) {
     redirect("/dashboard");
   }

@@ -76,7 +76,8 @@ export async function UpdateJObStatus(
     const job = await prisma.job.findUnique({
       where: { id: jobId },
     });
-    if (!job || job.userId !== session.user.id) {
+
+    if (!job || job.userId !== session.user.id) {   
       return { success: false, error: "Job not found or you lack ownership" };
     } //IDOR (Insecure Direct Object Reference) Protection
     
@@ -89,5 +90,51 @@ export async function UpdateJObStatus(
   } catch (error) {
     console.error("Update Engine Crash:", error);
     return { success: false, error: "System failed to update status" };
+  }
+}
+
+//StatusOfJOb
+export async function getJobStats() {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      throw new Error("Unauthorized request");
+    }
+
+    const statusCounts = await prisma.job.groupBy({
+      by: ['status'],
+      where: {
+        userId: session.user.id, 
+      },
+      _count: {
+        status: true,//for count the objects
+      },
+    });
+
+    const stats = {
+      total: 0,
+      PENDING: 0,
+      INTERVIEW: 0,
+      REJECTED: 0,
+      HIRED: 0,
+    };
+
+    statusCounts.forEach((item) => {
+      const count = item._count.status;
+      stats[item.status as keyof typeof stats] = count;
+      stats.total += count; 
+    });
+
+    return stats;
+
+  } catch (error) {
+    console.error("Stats Engine Crash:", error);
+    return {
+      total: 0,
+      PENDING: 0,
+      INTERVIEW: 0,
+      REJECTED: 0,
+      HIRED: 0,
+    };
   }
 }
