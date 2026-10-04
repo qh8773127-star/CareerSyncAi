@@ -9,10 +9,7 @@ import JobSearchFilters from "../components/JobSearchFilters";
 import Pagination from "../components/Pagination";
 import { getFilteredJobs } from "../actions/Job";
 
-export default async function DashboardPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ query?: string; status?: string; page?: string }>;
+export default async function DashboardPage({searchParams,}: {searchParams: Promise<{ query?: string; status?: string; page?: string }>;
 }) {
   const session = await auth();
 
@@ -25,9 +22,7 @@ export default async function DashboardPage({
 
   const statsJob = await getJobStats();
 
-  
   const { jobs: userJobs, totalPages } = await getFilteredJobs({
-    userId: session.user.id,
     query: query,
     status: status,
     page: currentPage,
@@ -47,17 +42,14 @@ export default async function DashboardPage({
         <SignOut />
       </header>
 
-    
       <section>
         <DashboardStats stats={statsJob} />
       </section>
 
-      
       <section className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
         <AddJobForm />
       </section>
 
-  
       <section>
         <h2 className="text-xl font-bold text-slate-800 mb-6 border-b border-slate-200 pb-2">
           Your Tracked Jobs
@@ -97,7 +89,7 @@ export default async function DashboardPage({
                 </div>
               </div>
             ))}
-           <Pagination currentPage={currentPage} totalPages={totalPages}/>
+            <Pagination currentPage={currentPage} totalPages={totalPages} />
           </div>
         )}
       </section>
