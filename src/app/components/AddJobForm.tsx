@@ -49,56 +49,112 @@ const AddJobForm = () => {
   }
 
   return (
-    <div className="p-4 border-2 border-gray-300 rounded-md max-w-md mx-auto mt-10">
-      <h2 className="text-xl font-bold mb-4 flex justify-center">Add job</h2>
-
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-        <div>
-          <input
-            type="text"
-            {...register("title")}
-            placeholder="Title"
-            className="border p-2 rounded text-black w-full outline-none focus:border-blue-500"
-          />
-          {errors.title && (
-            <p className="text-red-500 text-sm mt-1">{errors.title.message}</p>
-          )}
+    <div className="w-full max-w-3xl mx-auto mt-8 sm:mt-12 px-4">
+      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-5 sm:p-7">
+        {/* Header */}
+        <div className="mb-6">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+            Add New Job
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">
+            Add the details of the job you are applying for.
+          </p>
         </div>
 
-        <div>
-          <input
-            type="text"
-            {...register("company")}
-            placeholder="Company name"
-            className="border p-2 rounded text-black w-full outline-none focus:border-blue-500"
-          />
-          {errors.company && (
-            <p className="text-red-500 text-sm mt-1">
-              {errors.company.message}
-            </p>
-          )}
-        </div>
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
+          {/* Job Title */}
+          <div className="w-full">
+            <label
+              htmlFor="title"
+              className="block text-sm font-medium text-gray-700 mb-1.5"
+            >
+              Job Title
+            </label>
 
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="bg-blue-600 text-white p-2 cursor-pointer rounded disabled:bg-gray-400 disabled:cursor-not-allowed"
-        >
-          {isSubmitting ? "Submitting..." : "Job submit"}
-        </button>
-      </form>
+            <input
+              id="title"
+              type="text"
+              {...register("title")}
+              placeholder="e.g. Frontend Developer"
+              className={`w-full px-4 py-2.5 rounded-lg border text-gray-900
+              placeholder:text-gray-400 outline-none transition
+              focus:ring-2 focus:ring-blue-500/20
+              ${
+                errors.title
+                  ? "border-red-500 focus:border-red-500"
+                  : "border-gray-300 focus:border-blue-500"
+              }`}
+            />
 
-      {message && (
-        <p
-          className={`mt-4 font-semibold text-center ${
-            message.type === "success" ? "text-green-600" : "text-red-500"
-          }`}
-        >
-          {message.text}
-        </p>
-      )}
+            {errors.title && (
+              <p className="text-red-500 text-sm mt-1.5">
+                {errors.title.message}
+              </p>
+            )}
+          </div>
+
+          {/* Company */}
+          <div className="w-full">
+            <label
+              htmlFor="company"
+              className="block text-sm font-medium text-gray-700 mb-1.5"
+            >
+              Company Name
+            </label>
+
+            <input
+              id="company"
+              type="text"
+              {...register("company")}
+              placeholder="e.g. Microsoft"
+              className={`w-full px-4 py-2.5 rounded-lg border text-gray-900
+              placeholder:text-gray-400 outline-none transition
+              focus:ring-2 focus:ring-blue-500/20
+              ${
+                errors.company
+                  ? "border-red-500 focus:border-red-500"
+                  : "border-gray-300 focus:border-blue-500"
+              }`}
+            />
+
+            {errors.company && (
+              <p className="text-red-500 text-sm mt-1.5">
+                {errors.company.message}
+              </p>
+            )}
+          </div>
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full bg-blue-600 hover:bg-blue-700
+            text-white font-medium py-2.5 px-4 rounded-lg
+            transition duration-200
+            focus:outline-none focus:ring-2 focus:ring-blue-500
+            focus:ring-offset-2
+            disabled:bg-gray-400
+            disabled:cursor-not-allowed
+            disabled:hover:bg-gray-400"
+          >
+            {isSubmitting ? "Submitting..." : "Add Job"}
+          </button>
+        </form>
+
+        {/* Message */}
+        {message && (
+          <div
+            className={`mt-5 p-3 rounded-lg text-sm font-medium text-center ${
+              message.type === "success"
+                ? "bg-green-50 text-green-700 border border-green-200"
+                : "bg-red-50 text-red-700 border border-red-200"
+            }`}
+          >
+            {message.text}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
-
 export default AddJobForm;

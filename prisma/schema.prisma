@@ -28,14 +28,25 @@ enum JobStatus {
 }
 
 model Job {
-  id          String   @id @default(uuid())
-  title       String
-  company     String
-  status      JobStatus @default(PENDING)
-  userId      String
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime  @updatedAt
+  id              String   @id @default(uuid())
+  title           String   
+  company         String   
+  
+  // AI Fields
+  skills          String[] 
+  experienceLevel String   
+  summary         String
+  location        String
+  salaryRange     String
+  jobType         String
+
+  status          JobStatus @default(PENDING)
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
   @@index([userId])
 }
 

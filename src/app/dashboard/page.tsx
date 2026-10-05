@@ -7,7 +7,8 @@ import { getJobStats } from "../actions/Job";
 import DashboardStats from "../components/DashboardStats";
 import JobSearchFilters from "../components/JobSearchFilters";
 import Pagination from "../components/Pagination";
-import { getFilteredJobs } from "../actions/Job";
+import { getFilteredJobs } from "../actions/Job"; 
+import AiTester from "../components/AiTester";
 
 export default async function DashboardPage({searchParams,}: {searchParams: Promise<{ query?: string; status?: string; page?: string }>;
 }) {
@@ -46,6 +47,11 @@ export default async function DashboardPage({searchParams,}: {searchParams: Prom
       <section>
         <DashboardStats stats={statsJob} />
       </section>
+
+      <section>
+        <AiTester/>
+      </section>
+
 
       <section className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
         <AddJobForm />
