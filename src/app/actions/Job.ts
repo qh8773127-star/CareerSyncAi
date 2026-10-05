@@ -263,3 +263,37 @@ export async function getFilteredJobs(inputParams: unknown) {
     };
   }
 }
+export interface ExtractedJobData {
+  role: string;
+  company: string;
+  skills: string[];
+  experienceLevel: string;
+  summary: string;
+  location: string;
+  salaryRange: string;
+  jobType: string;
+}
+
+export async function saveJobToDatabase(jobData: ExtractedJobData) {
+  try {
+    const userId = await requireAuth();
+   
+    const newJob = await prisma.job.create({
+      data: {
+        title: jobData.role,       
+        company: jobData.company,
+        skills: jobData.skills,
+        experienceLevel: jobData.experienceLevel,
+        summary: jobData.summary,
+        location: jobData.location,
+        salaryRange: jobData.salaryRange,
+        jobType: jobData.jobType,
+        userId: userId, 
+      },
+    });
+    return { success: true, job: newJob };
+  } catch (error) {
+    console.error("Prisma Crash:", error);
+    return { success: false, error: "Database mein job save hone se fail ho gayi." };
+  }
+}
