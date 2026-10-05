@@ -11,8 +11,8 @@ import { getFilteredJobs } from "../actions/Job";
 
 export default async function DashboardPage({searchParams,}: {searchParams: Promise<{ query?: string; status?: string; page?: string }>;
 }) {
+  
   const session = await auth();
-
   if (!session?.user?.id) {
     redirect("/");
   }
@@ -32,6 +32,7 @@ export default async function DashboardPage({searchParams,}: {searchParams: Prom
     <div className="min-h-screen p-6 md:p-10 max-w-5xl mx-auto space-y-10">
       <header className="flex justify-between items-center border-b sticky top-0 z-50 bg-slate-50/80 backdrop-blur-md border-slate-200 py-4 mb-4">
         <div>
+          
           <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
             CareerSync
           </h1>
