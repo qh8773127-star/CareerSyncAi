@@ -39,6 +39,12 @@ export async function createJob(formData: unknown) {
       data: {
         title: validation.data.title,
         company: validation.data.company,
+        location:validation.data.location,
+        skills:validation.data.skills.split(",").map((s)=>s.trim()),
+        experienceLevel:validation.data.experienceLevel,
+        jobType:validation.data.jobType,
+        summary: "Manually added. No AI summary.", 
+        salaryRange: "Not Disclosed",
         userId,
       },
     });
