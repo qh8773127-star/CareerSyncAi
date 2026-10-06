@@ -33,9 +33,9 @@ export default function AiTester() {
         const dbResult = await saveJobToDatabase(result.data);
   
   if (dbResult.success) {
-    toast.success("Nanga Sach: Job AI se extract ho kar database mein lock ho gayi!");
+    toast.success(": All details are stored!");
   } else {
-    toast.error("AI chala, par DB fail: " + dbResult.error);
+    toast.error("details are't stored due to some error: " + dbResult.error);
   }
       } else {
         console.error("AI Crash:", result.error);

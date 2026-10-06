@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { string, z } from "zod";
 import { JobStatus } from "@prisma/client";
 
 export const createJobSchema = z.object({
@@ -13,6 +13,23 @@ export const createJobSchema = z.object({
     .trim()
     .min(2, "Company name too short")
     .max(50, "Company name too long"),
+
+  location: z
+  .string()
+  .trim()
+  .min(2,"Location is too short")
+  .max(100,"Location is too long"),
+
+  skills: z
+  .string()
+  .min(1,"Please add some skill")
+  .trim(),
+
+  experienceLevel: z
+  .enum(["ENTRY","MID","SENIOR"]),
+
+  jobType: z
+  .enum(["PART_TIME", "FULL_TIME"])
 });
 
 export const jobIdSchema = z
