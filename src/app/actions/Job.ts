@@ -11,10 +11,8 @@ import { revalidatePath } from "next/cache";
 import { auth } from "../auth";
 import { prisma } from "../lib/prisma";
 import { Prisma } from "@prisma/client";
-import { title } from "process";
-import { error } from "console";
 
-async function requireAuth() {
+export async function requireAuth() {
   const session = await auth();
 
   if (!session?.user?.id) {
