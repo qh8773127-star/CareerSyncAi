@@ -60,7 +60,7 @@ export default function AiTester() {
       <button
         onClick={handleFireAI}
         disabled={isPending || jobInput.length < 20} 
-        className="bg-slate-900 text-white px-4 py-2 rounded-md disabled:bg-slate-400 font-medium"
+        className="bg-slate-900 cursor-pointer text-white px-4 py-2 rounded-md disabled:bg-slate-400 font-medium"
       >
         {isPending ? "AI is Extracting..." : "Extract Job Details"}
       </button>
