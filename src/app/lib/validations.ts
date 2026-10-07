@@ -1,4 +1,4 @@
-import { string, z } from "zod";
+import {  z } from "zod";
 import { JobStatus } from "@prisma/client";
 
 export const createJobSchema = z.object({

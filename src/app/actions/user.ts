@@ -15,13 +15,13 @@
 //     const existingUser = await prisma.user.findUnique({
 //       where: { email: userValidation.data.email },
 //     });
-//     if (existingUser) {
-//       return { success: false, 
-//       code: "DUPLICATE_RECORD",
-//       field: "email",
-//       message: "Email already exists!"
-//       };
-//     }
+    // if (existingUser) {
+    //   return { success: false, 
+    //   code: "DUPLICATE_RECORD",
+    //   field: "email",
+    //   message: "Email already exists!"
+    //   };
+    // }
 //     const newUser = await prisma.user.create({
 //       data: userValidation.data,
 //     });

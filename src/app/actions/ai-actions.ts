@@ -58,6 +58,10 @@ jobType: z
     .describe("Exactly 2 sentences explaining what the job is about"),
 });
 
+function sanitizeJobDescription(text:string){
+  return text.trim().replace(/\s+/g, ' ').substring(0, 5000);
+}
+
 export async function analyzeJobDescription(rawJobText: string) {
   try {
     if (!rawJobText || rawJobText.trim().length < 20) {
@@ -66,6 +70,8 @@ export async function analyzeJobDescription(rawJobText: string) {
         error: "Job description is too short.",
       };
     }
+
+    const cleanJobDescription= sanitizeJobDescription(rawJobText);
 
     const { object } = await generateObject({
       model: google("gemini-3.5-flash"),
@@ -76,7 +82,7 @@ Analyze the following job description.
 Extract the information according to the provided schema.
 
 Job Description:
-${rawJobText}
+${cleanJobDescription}
 `,
     });
 
@@ -89,7 +95,7 @@ ${rawJobText}
 
     return {
       success: false,
-      error: "AI fail to extract data.",
+      error: `AI fail to extract data.`,
     };
   }
 }

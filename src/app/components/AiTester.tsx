@@ -28,6 +28,8 @@ export default function AiTester() {
 
       if (result.success && result.data) {
 
+
+
         setAiResponse(result.data);
 
         const dbResult = await saveJobToDatabase(result.data);
@@ -50,7 +52,7 @@ export default function AiTester() {
       <textarea
         className="w-full p-3 border rounded-md mb-4 text-black outline-none focus:ring-2 focus:ring-blue-500"
         rows={6}
-        placeholder="Apni job description yahan paste kar..."
+        placeholder="Enter your job description here..."
         value={jobInput}
         onChange={(e) => setJobInput(e.target.value)}
       />

@@ -48,6 +48,8 @@ model Job {
   updatedAt       DateTime @updatedAt
   
   @@index([userId])
+
+  @@unique([userId, title, company]) //prevent race condition
 }
 
 model Account {
