@@ -10,10 +10,10 @@ export default async function HomePage() {
   }
 
   return (
-    // min-h-screen aur center alignment se content bilkul beech mein aayega
+  
     <main className="min-h-screen flex items-center justify-center p-6">
       
-      {/* Yeh ek clean, modern card hai jisme login button aur text hoga */}
+      
       <div className="max-w-md w-full bg-white p-10 rounded-2xl shadow-sm border border-slate-200 text-center space-y-8">
         
         <div className="space-y-3">
@@ -24,8 +24,6 @@ export default async function HomePage() {
             Track your job applications and manage your career like a pro.
           </p>
         </div>
-
-        {/* Tera GitHub/Google Sign In Button */}
         <SignIn />
         
       </div>
