@@ -21,9 +21,13 @@ const AddJobForm = () => {
   } = useForm<JobFormValues>({
     resolver: zodResolver(createJobSchema),
     defaultValues: {
-      title: "",
-      company: "", // value change
-    },
+        title: "",
+    company: "",
+    location: "",
+    skills: "",          // 👈 string, array nahi
+    experienceLevel: "ENTRY",
+    jobType: "FULL_TIME",
+  },
   });
 
   async function onSubmit(data: JobFormValues) {
@@ -36,6 +40,8 @@ const AddJobForm = () => {
           type: "success",
         });
         reset();
+
+        
       } else {
         setMessage({ text: `Error: ${response?.error}`, type: "error" });
       }
