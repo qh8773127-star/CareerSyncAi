@@ -9,6 +9,7 @@ import JobSearchFilters from "../components/JobSearchFilters";
 import Pagination from "../components/Pagination";
 import { getFilteredJobs } from "../actions/Job";
 import AiTester from "../components/AiTester";
+import DeleteAllJobsButton from "../components/DeleteAllJobsButton";
 
 export default async function DashboardPage({
   searchParams,
@@ -42,6 +43,7 @@ export default async function DashboardPage({
             Manage and track your job applications
           </p>
         </div>
+        <DeleteAllJobsButton/>
         <SignOut />
       </header>
 

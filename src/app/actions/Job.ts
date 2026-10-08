@@ -10,7 +10,7 @@ import { revalidatePath } from "next/cache";
 import { auth } from "../auth";
 import { prisma } from "../lib/prisma";
 import { Prisma } from "@prisma/client";
-import { AppError } from "../lib/Error";
+import { ActionResult, AppError } from "../lib/Error";
 
 //Oauth
 export async function requireAuth(): Promise<string> {
@@ -30,6 +30,44 @@ const DUPLICATE_ERROR = {
   error: "Job already exists in your dashboard!",
 };
 
+export async function deleteAll(): Promise<ActionResult<null>> {
+  try {
+    const userId = await requireAuth();
+
+    const count = await prisma.job.count({
+      where: { userId },
+    });
+    if (count === 0) {
+      return {
+        // ✅ return
+        success: false ,
+        code: "VALIDATION_ERROR" as const,
+        error: "No Jobs to Delete.",
+      };
+    }
+    await prisma.job.deleteMany({
+      where: { userId },
+    });
+
+    return { success: true , data: null };
+    revalidatePath("/dashboard");
+  } catch (error) {
+    console.log(`Delete All Jobs Error ${error}`);
+
+    if (error instanceof AppError) {
+      return {
+        success: false ,
+        code: error.code,
+        error: error.message,
+      };
+    }
+    return {
+      success: false ,
+      code: "INTERNAL" as const,
+      error: "Failed to delete jobs. Please try again.",
+    };
+  }
+}
 //Create
 export async function createJob(formData: unknown) {
   try {
@@ -117,7 +155,7 @@ export async function deleteJob(jobId: unknown) {
 
     if (!validation.success) {
       return {
-        success: false,
+        success: false as const,
         error: "Invalid job ID",
       };
     }
@@ -131,7 +169,7 @@ export async function deleteJob(jobId: unknown) {
 
     if (result.count === 0) {
       return {
-        success: false,
+        success: false as const,
         error: "Job not found",
       };
     }
@@ -139,13 +177,20 @@ export async function deleteJob(jobId: unknown) {
     revalidatePath("/dashboard");
 
     return {
-      success: true,
+      success: true as const,
     };
   } catch (error) {
     console.error("Delete Job Error:", error);
+    if (error instanceof AppError) {
+      return {
+        success: false as const,
+        code: error.code,
+        error: error.message,
+      };
+    }
 
     return {
-      success: false,
+      success: false as const,
       error: "Failed to delete job",
     };
   }
@@ -162,7 +207,7 @@ export async function updateJobStatus(jobId: unknown, newStatus: unknown) {
 
     if (!validation.success) {
       return {
-        success: false,
+        success: false as const,
         error: "Invalid update data",
       };
     }
@@ -179,7 +224,7 @@ export async function updateJobStatus(jobId: unknown, newStatus: unknown) {
 
     if (result.count === 0) {
       return {
-        success: false,
+        success: false as const,
         error: "Job not found",
       };
     }
@@ -187,13 +232,13 @@ export async function updateJobStatus(jobId: unknown, newStatus: unknown) {
     revalidatePath("/dashboard");
 
     return {
-      success: true,
+      success: true as const,
     };
   } catch (error) {
     console.error("Update Job Error:", error);
 
     return {
-      success: false,
+      success: false as const,
       error: "Failed to update job",
     };
   }
@@ -349,12 +394,12 @@ export async function saveJobToDatabase(jobData: ExtractedJobData) {
         userId,
       },
     });
-    return { success: true, job: newJob };
+    return { success: true , job: newJob };
   } catch (error) {
     console.error("Prisma Crash:", error);
     if (error instanceof AppError) {
       return {
-        success: false as const,
+        success: false ,
         code: error.code,
         error: error.message,
       };
@@ -369,7 +414,7 @@ export async function saveJobToDatabase(jobData: ExtractedJobData) {
 
     console.error("Save Job Error:", error);
     return {
-      success: false as const,
+      success: false ,
       code: "INTERNAL" as const,
       error: "Failed to save job. Please try again.",
     };
