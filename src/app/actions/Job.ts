@@ -1,27 +1,36 @@
 "use server";
-
+//import
 import {
   createJobSchema,
   filterJobsSchema,
   jobIdSchema,
   updateJobStatusSchema,
 } from "../lib/validations";
-
 import { revalidatePath } from "next/cache";
 import { auth } from "../auth";
 import { prisma } from "../lib/prisma";
 import { Prisma } from "@prisma/client";
+import { AppError } from "../lib/Error";
 
-export async function requireAuth() {
+//Oauth
+export async function requireAuth(): Promise<string> {
   const session = await auth();
 
   if (!session?.user?.id) {
-    throw new Error("Unauthorized");
+    throw new AppError("UNAUTHORIZED", "Please sign in to continue.", 401);
   }
 
   return session.user.id;
 }
 
+//Error MSG
+const DUPLICATE_ERROR = {
+  success: false as const,
+  code: "DUPLICATE_RECORD" as const,
+  error: "Job already exists in your dashboard!",
+};
+
+//Create
 export async function createJob(formData: unknown) {
   try {
     const userId = await requireAuth();
@@ -30,17 +39,39 @@ export async function createJob(formData: unknown) {
 
     if (!validation.success) {
       return {
-        success: false,
-        error: "Invalid job data",
+        success: false as const,
+        code: "VALIDATION_ERROR" as const,
+        error: validation.error.issues[0]?.message ?? "Invalid job data",
       };
     }
+
+    const existingJob = await prisma.job.findFirst({
+      where: {
+        userId,
+        title: validation.data.title,
+        company: validation.data.company,
+      },
+      select: { id: true },
+    });
+
+    if (existingJob) {
+      return DUPLICATE_ERROR;
+    }
+    const skillsArray = validation.data.skills
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .filter(
+        (s, i, arr) =>
+          arr.findIndex((x) => x.toLowerCase() === s.toLowerCase()) === i,
+      );
 
     await prisma.job.create({
       data: {
         title: validation.data.title,
         company: validation.data.company,
         location: validation.data.location,
-        skills: validation.data.skills.split(",").map((s) => s.trim()),
+        skills: skillsArray,
         experienceLevel: validation.data.experienceLevel,
         jobType: validation.data.jobType,
         summary: "Manually added. No AI summary.",
@@ -52,14 +83,28 @@ export async function createJob(formData: unknown) {
     revalidatePath("/dashboard");
 
     return {
-      success: true,
+      success: true as const,
     };
   } catch (error) {
-    console.error("Create Job Error:", error);
+    if (error instanceof AppError) {
+      return {
+        success: false as const,
+        code: error.code,
+        error: error.message,
+      };
+    }
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      return DUPLICATE_ERROR;
+    }
 
+    console.error("Create Job Error:", error);
     return {
-      success: false,
-      error: "Failed to create job",
+      success: false as const,
+      code: "INTERNAL" as const,
+      error: "Failed to create job. Please try again.",
     };
   }
 }
@@ -285,16 +330,11 @@ export async function saveJobToDatabase(jobData: ExtractedJobData) {
     const userId = await requireAuth();
 
     const existingJob = await prisma.job.findFirst({
-      where: { userId: userId, title: jobData.role, company: jobData.company },
+      where: { userId, title: jobData.role, company: jobData.company },
+      select: { id: true },
     });
 
-    if (existingJob) {
-      return {
-        success: false,
-        code: "DUPLICATE_RECORD",
-        error: "Job already exists in your dashboard!",
-      };
-    }
+    if (existingJob) return DUPLICATE_ERROR;
 
     const newJob = await prisma.job.create({
       data: {
@@ -306,15 +346,32 @@ export async function saveJobToDatabase(jobData: ExtractedJobData) {
         location: jobData.location,
         salaryRange: jobData.salaryRange,
         jobType: jobData.jobType,
-        userId: userId,
+        userId,
       },
     });
     return { success: true, job: newJob };
   } catch (error) {
     console.error("Prisma Crash:", error);
+    if (error instanceof AppError) {
+      return {
+        success: false as const,
+        code: error.code,
+        error: error.message,
+      };
+    }
+
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      return DUPLICATE_ERROR;
+    }
+
+    console.error("Save Job Error:", error);
     return {
-      success: false,
-      error: "Database mein job save hone se fail ho gayi.",
+      success: false as const,
+      code: "INTERNAL" as const,
+      error: "Failed to save job. Please try again.",
     };
   }
 }
