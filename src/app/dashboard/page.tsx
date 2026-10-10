@@ -10,6 +10,7 @@ import Pagination from "../components/Pagination";
 import { getFilteredJobs } from "../actions/Job";
 import AiTester from "../components/AiTester";
 import DeleteAllJobsButton from "../components/DeleteAllJobsButton";
+import CareerCoachPage from "../components/CareerCoachPage";
 
 export default async function DashboardPage({
   searchParams,
@@ -49,6 +50,10 @@ export default async function DashboardPage({
 
       <section>
         <DashboardStats stats={statsJob} />
+      </section>
+
+      <section>
+        <CareerCoachPage/>
       </section>
 
       <section>
