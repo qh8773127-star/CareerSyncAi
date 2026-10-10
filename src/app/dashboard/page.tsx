@@ -78,7 +78,7 @@ export default async function DashboardPage({
                 key={job.id}
                 className="group flex flex-col md:flex-row md:items-start justify-between p-5 rounded-xl border border-slate-200 bg-white hover:border-indigo-300 hover:shadow-md transition-all duration-200"
               >
-                {/* Left Section: Job Details & Badges */}
+           
                 <div className="flex flex-col mb-4 md:mb-0 max-w-2xl">
                   <h3 className="font-bold text-lg text-slate-900 group-hover:text-indigo-600 transition-colors">
                     {job.title}
@@ -87,9 +87,8 @@ export default async function DashboardPage({
                     Company: {job.company}
                   </p>
 
-                  {/* Metadata Badges */}
                   <div className="flex flex-wrap items-center gap-3 text-sm">
-                    {/* Defensive Location Check */}
+
                     {job.location &&
                     job.location !== "Not Specified" &&
                     job.location.trim() !== "" ? (

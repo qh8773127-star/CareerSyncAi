@@ -239,6 +239,8 @@ const AddJobForm = () => {
             >
               <option value="PART_TIME">Part Time</option>
               <option value="FULL_TIME">Full Time</option>
+              <option value="CONTRACT">CONTRACT</option>
+              <option value="INTERNSHIP">INTERNSHIP</option>
             </select>
           </div>
         </div>

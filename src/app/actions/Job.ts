@@ -11,6 +11,7 @@ import { auth } from "../auth";
 import { prisma } from "../lib/prisma";
 import { Prisma } from "@prisma/client";
 import { ActionResult, AppError } from "../lib/Error";
+import { type JobAnalysisResult } from "../lib/validations";
 
 //Oauth
 export async function requireAuth(): Promise<string> {
@@ -359,18 +360,8 @@ export async function getFilteredJobs(inputParams: unknown) {
     };
   }
 }
-export interface ExtractedJobData {
-  role: string;
-  company: string;
-  skills: string[];
-  experienceLevel: string;
-  summary: string;
-  location: string;
-  salaryRange: string;
-  jobType: string;
-}
 
-export async function saveJobToDatabase(jobData: ExtractedJobData) {
+export async function saveJobToDatabase(jobData: JobAnalysisResult) {
   try {
     const userId = await requireAuth();
 
