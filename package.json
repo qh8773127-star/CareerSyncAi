@@ -10,12 +10,13 @@
     "postinstall": "prisma skills sync || exit 0"
   },
   "dependencies": {
-    "@ai-sdk/google": "^4.0.87",
+    "@ai-sdk/google": "^4.0.93",
+    "@ai-sdk/react": "^4.0.140",
     "@auth/prisma-adapter": "^2.11.3",
     "@hookform/resolvers": "^5.9.1",
     "@upstash/ratelimit": "^2.2.0",
     "@upstash/redis": "^1.39.0",
-    "ai": "^7.0.127",
+    "ai": "^7.0.137",
     "next": "16.3.6",
     "next-auth": "^5.0.0-beta.32",
     "react": "19.2.8",

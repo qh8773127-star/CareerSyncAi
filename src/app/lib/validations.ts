@@ -93,3 +93,4 @@ export const jobAnalysisSchema = z.object({
     .describe("Exactly 2 sentences explaining what the job is about"),
 });
 export type JobAnalysisResult = z.infer<typeof jobAnalysisSchema>;
+
