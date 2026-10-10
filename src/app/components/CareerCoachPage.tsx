@@ -3,6 +3,7 @@
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useRef, useEffect, useState } from "react";
+import { Markdown } from "./Markdown";
 
 export default function CareerCoachPage() {
   const { messages, sendMessage, status } = useChat({
@@ -48,12 +49,12 @@ export default function CareerCoachPage() {
                 }`}
               >
                 <strong className="block text-xs opacity-50 mb-1">
-                  {m.role === "user" ? "Tu" : "AI Coach"}
+                  {m.role === "user" ? "you" : "AI Coach"}
                 </strong>
-                <div className="text-sm whitespace-pre-wrap leading-relaxed">
+                <div className="text-sm leading-relaxed">
                   {m.parts.map((part, i) =>
                     part.type === "text" ? (
-                      <span key={i}>{part.text}</span>
+                      <Markdown key={i} content={part.text} /> 
                     ) : null,
                   )}
                 </div>
