@@ -40,7 +40,6 @@ export async function deleteAll(): Promise<ActionResult<null>> {
     });
     if (count === 0) {
       return {
-        // ✅ return
         success: false ,
         code: "VALIDATION_ERROR" as const,
         error: "No Jobs to Delete.",

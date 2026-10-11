@@ -1,20 +1,17 @@
 "use server";
 
 import { generateObject } from "ai";
-import { Redis } from "@upstash/redis";
 import { requireAuth } from "./Job";
 import { Ratelimit } from "@upstash/ratelimit";
 import { google } from "@ai-sdk/google";
 import { jobAnalysisSchema } from "../lib/validations";
 import { DESCRIPTION_EXTRACTOR } from "../lib/prompt";
+import { redis } from "../lib/redis";
 
 function sanitizeJobDescription(text: string) {
   return text.trim().replace(/\s+/g, " ").substring(0, 5000);
 }
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL!,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-});
+
 const ratelimit = new Ratelimit({
   redis: redis,
   limiter: Ratelimit.slidingWindow(5, "1 m"),
