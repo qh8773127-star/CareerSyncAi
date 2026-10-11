@@ -38,15 +38,7 @@ export default function CareerCoachPage() {
   }, [isLoading]);
 
   return (
-    <div className="flex flex-col h-[80vh] max-w-3xl mx-auto p-4 mt-6 border border-slate-200 rounded-xl bg-slate-50 shadow-sm">
-      <div className="pb-4 border-b border-slate-200 mb-4">
-        <h1 className="text-2xl font-extrabold text-slate-900">
-          CareerSync AI Coach
-        </h1>
-        <p className="text-sm text-slate-500">
-          Ask me anything about your career development. .
-        </p>
-      </div>
+    <div className="flex flex-col h-[85vh] max-w-full mx-auto p-4 mt-6 border border-slate-200 rounded-xl bg-slate-50 shadow-sm">
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-white rounded-lg border border-slate-100 mb-4">
         {messages.length === 0 ? (
@@ -81,7 +73,7 @@ export default function CareerCoachPage() {
             </div>
           ))
         )}
-
+        
         {isLoading &&
           messages.length > 0 &&
           messages[messages.length - 1].role === "user" && (

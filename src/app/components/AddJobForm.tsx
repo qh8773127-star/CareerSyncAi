@@ -71,7 +71,7 @@ const AddJobForm = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          {/* Job Title */}
+        
           <div className="sm:col-span-2">
             <label
               htmlFor="title"
@@ -85,6 +85,7 @@ const AddJobForm = () => {
               type="text"
               {...register("title")}
               placeholder="e.g. Frontend Developer"
+              required
               className={`w-full px-4 py-2.5 rounded-lg border bg-white text-gray-900
         placeholder:text-gray-400 outline-none transition-all duration-200
         focus:ring-4 focus:ring-blue-500/10
@@ -116,6 +117,7 @@ const AddJobForm = () => {
               type="text"
               {...register("company")}
               placeholder="e.g. Microsoft"
+              required
               className={`w-full px-4 py-2.5 rounded-lg border bg-white text-gray-900
         placeholder:text-gray-400 outline-none transition-all duration-200
         focus:ring-4 focus:ring-blue-500/10
@@ -147,6 +149,7 @@ const AddJobForm = () => {
               type="text"
               {...register("location")}
               placeholder="e.g. Lahore, Pakistan"
+              required
               className={`w-full px-4 py-2.5 rounded-lg border bg-white text-gray-900
         placeholder:text-gray-400 outline-none transition-all duration-200
         focus:ring-4 focus:ring-blue-500/10
@@ -178,6 +181,7 @@ const AddJobForm = () => {
               type="text"
               {...register("skills")}
               placeholder="e.g. React, JavaScript, Node.js"
+
               className={`w-full px-4 py-2.5 rounded-lg border bg-white text-gray-900
         placeholder:text-gray-400 outline-none transition-all duration-200
         focus:ring-4 focus:ring-blue-500/10
@@ -199,7 +203,6 @@ const AddJobForm = () => {
             </p>
           </div>
 
-          {/* Experience Level */}
           <div>
             <label
               htmlFor="experienceLevel"
@@ -221,7 +224,6 @@ const AddJobForm = () => {
             </select>
           </div>
 
-          {/* Job Type */}
           <div>
             <label
               htmlFor="jobType"
@@ -245,7 +247,6 @@ const AddJobForm = () => {
           </div>
         </div>
 
-        {/* Submit Button */}
         <div className="mt-7">
           <button
             type="submit"
@@ -263,7 +264,7 @@ const AddJobForm = () => {
           </button>
         </div>
       </form>
-      {/* Message */}
+
       {message && (
         <div
           className={`mt-5 p-3 rounded-lg text-sm font-medium text-center ${
