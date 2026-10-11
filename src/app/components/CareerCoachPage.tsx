@@ -5,11 +5,19 @@ import { DefaultChatTransport } from "ai";
 import { useRef, useEffect, useState } from "react";
 import { Markdown } from "./Markdown";
 
+const THINKING_MESSAGES = [
+  "Thinking...",
+  "Analyzing your question...",
+  "Reviewing best practices...",
+  "Crafting a response...",
+];
+
 export default function CareerCoachPage() {
   const { messages, sendMessage, status } = useChat({
     transport: new DefaultChatTransport({ api: "/api/chat" }),
   });
 
+  const [thinkingIndex, setThinkingIndex] = useState(0);
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -18,6 +26,16 @@ export default function CareerCoachPage() {
   }, [messages]);
 
   const isLoading = status === "submitted" || status === "streaming";
+
+  useEffect(() => {
+    if (!isLoading) return;
+
+    const interval = setInterval(() => {
+      setThinkingIndex((prev) => (prev + 1) % THINKING_MESSAGES.length);
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [isLoading]);
 
   return (
     <div className="flex flex-col h-[80vh] max-w-3xl mx-auto p-4 mt-6 border border-slate-200 rounded-xl bg-slate-50 shadow-sm">
@@ -72,16 +90,22 @@ export default function CareerCoachPage() {
                 <strong className="block text-xs opacity-50 mb-2">
                   AI Coach
                 </strong>
-                <div className="flex items-center gap-1.5 py-1">
-                  <span
-                    className="w-2.5 h-2.5 bg-slate-400 rounded-full animate-bounce"
-                    style={{ animationDelay: "-0.3s" }}
-                  />
-                  <span
-                    className="w-2.5 h-2.5 bg-slate-400 rounded-full animate-bounce"
-                    style={{ animationDelay: "-0.15s" }}
-                  />
-                  <span className="w-2.5 h-2.5 bg-slate-400 rounded-full animate-bounce" />
+
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-slate-500 animate-pulse">
+                    {THINKING_MESSAGES[thinkingIndex]}
+                  </span>
+                  <div className="flex items-center gap-1">
+                    <span
+                      className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce"
+                      style={{ animationDelay: "-0.3s" }}
+                    />
+                    <span
+                      className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce"
+                      style={{ animationDelay: "-0.15s" }}
+                    />
+                    <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" />
+                  </div>
                 </div>
               </div>
             </div>
@@ -94,6 +118,7 @@ export default function CareerCoachPage() {
         onSubmit={(e) => {
           e.preventDefault();
           if (input.trim()) {
+            setThinkingIndex(0);
             sendMessage({ text: input });
             setInput("");
           }
