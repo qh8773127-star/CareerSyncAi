@@ -16,14 +16,11 @@ export const createJobSchema = z.object({
     .min(2, "Location is too short")
     .max(100, "Location is too long"),
 
-  skills: z
-    .string()
-    .trim()
-    .min(1, "Please add at least one skill"),
+  skills: z.string().trim().min(1, "Please add at least one skill"),
 
   experienceLevel: z.enum(["ENTRY", "MID", "SENIOR"]),
 
-  jobType: z.enum(["PART_TIME", "FULL_TIME","CONTRACT","INTERNSHIP"]),
+  jobType: z.enum(["PART_TIME", "FULL_TIME", "CONTRACT", "INTERNSHIP"]),
 });
 
 export const jobIdSchema = z.string().uuid("Invalid Job ID format");
@@ -94,3 +91,17 @@ export const jobAnalysisSchema = z.object({
 });
 export type JobAnalysisResult = z.infer<typeof jobAnalysisSchema>;
 
+export const chatRequestSchema = z.object({
+  messages: z.array(
+    z.object({
+      id: z.string().optional(),
+      role: z.enum(["user", "assistant"]),
+      parts: z.array(
+        z.object({
+          type: z.string(),
+          text: z.string().max(2000).optional(), // har part ka text
+        }),
+      ),
+    }),
+  ).max(50),
+});

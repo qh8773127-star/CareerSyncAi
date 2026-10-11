@@ -33,7 +33,8 @@ export default function CareerCoachPage() {
       <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-white rounded-lg border border-slate-100 mb-4">
         {messages.length === 0 ? (
           <div className="text-center text-slate-400 text-sm mt-10">
-            Start by asking a question about your career, resume, or interview preparation.
+            Start by asking a question about your career, resume, or interview
+            preparation.
           </div>
         ) : (
           messages.map((m) => (
@@ -54,7 +55,7 @@ export default function CareerCoachPage() {
                 <div className="text-sm leading-relaxed">
                   {m.parts.map((part, i) =>
                     part.type === "text" ? (
-                      <Markdown key={i} content={part.text} /> 
+                      <Markdown key={i} content={part.text} />
                     ) : null,
                   )}
                 </div>
@@ -62,6 +63,30 @@ export default function CareerCoachPage() {
             </div>
           ))
         )}
+
+        {isLoading &&
+          messages.length > 0 &&
+          messages[messages.length - 1].role === "user" && (
+            <div className="flex justify-start">
+              <div className="max-w-[80%] rounded-lg p-3 bg-slate-100 text-slate-800 rounded-bl-none border border-slate-200">
+                <strong className="block text-xs opacity-50 mb-2">
+                  AI Coach
+                </strong>
+                <div className="flex items-center gap-1.5 py-1">
+                  <span
+                    className="w-2.5 h-2.5 bg-slate-400 rounded-full animate-bounce"
+                    style={{ animationDelay: "-0.3s" }}
+                  />
+                  <span
+                    className="w-2.5 h-2.5 bg-slate-400 rounded-full animate-bounce"
+                    style={{ animationDelay: "-0.15s" }}
+                  />
+                  <span className="w-2.5 h-2.5 bg-slate-400 rounded-full animate-bounce" />
+                </div>
+              </div>
+            </div>
+          )}
+
         <div ref={messagesEndRef} />
       </div>
 
@@ -86,7 +111,7 @@ export default function CareerCoachPage() {
         <button
           type="submit"
           disabled={isLoading || !input.trim()}
-          className="bg-slate-900 text-white px-6 py-3 rounded-lg font-bold hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="bg-slate-900 text-white px-6 py-3 rounded-lg font-bold hover:bg-slate-800 transition-colors disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
         >
           {isLoading ? "..." : "Send"}
         </button>
