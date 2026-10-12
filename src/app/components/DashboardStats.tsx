@@ -9,7 +9,6 @@ interface DashboardStatsProps {
 }
 
 const DashboardStats = ({ stats }: DashboardStatsProps) => {
-  // Explicitly added the 'Rejected' card to show the brutal reality
   const statCards = [
     {
       title: "Total Applications",
@@ -44,7 +43,6 @@ const DashboardStats = ({ stats }: DashboardStatsProps) => {
   ];
 
   return (
-    // Strictly changed to lg:grid-cols-5 taake panchon dabbe ek line mein saans le sakein
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
       {statCards.map((card, index) => (
         <div
@@ -52,7 +50,7 @@ const DashboardStats = ({ stats }: DashboardStatsProps) => {
           className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col gap-1"
         >
           <span
-            className={`text-[11px] font-bold uppercase tracking-wider ${card.titleColor} truncate`}
+            className={`text-[11px] font-bold uppercase tracking-wider ${card.titleColor} `}
           >
             {card.title}
           </span>
