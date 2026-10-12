@@ -64,7 +64,7 @@ const JobSearchFilters = () => {
           <option value="HIRED">Hired</option>
         </select>
       </div>
-      {/* <DeleteAllJobsButton/> */}
+      <DeleteAllJobsButton/>
     </div>
   );
 };

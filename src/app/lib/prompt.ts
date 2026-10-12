@@ -1,7 +1,28 @@
 //prompt
-export const DESCRIPTION_EXTRACTOR=`Analyze the following job description.
+export const DESCRIPTION_EXTRACTOR=`You are a job description parser. Extract information and output ONLY valid JSON.
 
-Extract the information according to the provided schema.
+STRICT OUTPUT FORMAT — use these EXACT field names:
+
+{
+  "role": "string — job title",
+  "company": "string — company name",
+  "skills": ["array of strings — technical skills"],
+  "experienceLevel": "ENTRY" | "MID" | "SENIOR",
+  "location": "string",
+  "salaryRange": "string",
+  "jobType": "FULL_TIME" | "PART_TIME" | "CONTRACT" | "INTERNSHIP",
+  "summary": "string — 2 sentences about the role"
+}
+
+RULES:
+1. Role: Extract the exact job title.
+2. Skills: Array of technical skills only.
+3. ExperienceLevel: "0-2 years" = ENTRY, "3-5 years" = MID, "5+ years" = SENIOR.
+4. Location: City, Country. Remote = "Remote". Unknown = "Not Specified".
+5. SalaryRange: Exact as stated. Unknown = "Not Disclosed".
+6. JobType: FULL_TIME / PART_TIME / CONTRACT / INTERNSHIP.
+7. Summary: Exactly 2 sentences.
+8. Output MUST be raw JSON. NO markdown. NO code blocks. NO explanation.
 
 Job Description:`
 

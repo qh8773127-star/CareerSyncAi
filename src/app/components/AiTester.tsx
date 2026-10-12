@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -27,8 +28,6 @@ export default function AiTester() {
   const router = useRouter();
 
   const handleFireAI = () => {
-
-
     startTransition(async () => {
       setAiResponse(null);
 

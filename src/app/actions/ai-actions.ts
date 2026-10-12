@@ -1,9 +1,9 @@
 "use server";
 
-import { generateObject } from "ai";
+import { generateText } from "ai";
 import { requireAuth } from "./Job";
 import { Ratelimit } from "@upstash/ratelimit";
-import { google } from "@ai-sdk/google";
+import { groq } from "@ai-sdk/groq";
 import { jobAnalysisSchema } from "../lib/validations";
 import { DESCRIPTION_EXTRACTOR } from "../lib/prompt";
 import { redis } from "../lib/redis";
@@ -37,11 +37,20 @@ export async function analyzeJobDescription(rawJobText: string) {
 
     const cleanJobDescription = sanitizeJobDescription(rawJobText);
 
-    const { object } = await generateObject({
-      model: google(`gemini-3.8-flash`),
-      schema: jobAnalysisSchema,
+    const { text } = await generateText({
+      model: groq("openai/gpt-oss-20b"),
       prompt: `${DESCRIPTION_EXTRACTOR}${cleanJobDescription}`,
     });
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+
+    if (!jsonMatch) {
+      console.error("Raw LLM Output:", text);
+      throw new Error("AI failed to return a valid JSON structure.");
+    }
+
+    const cleanJsonString = jsonMatch[0];
+    const parsedData = JSON.parse(cleanJsonString);
+    const object = jobAnalysisSchema.parse(parsedData);
 
     return {
       success: true,
