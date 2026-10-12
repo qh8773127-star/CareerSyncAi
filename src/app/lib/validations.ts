@@ -95,13 +95,13 @@ export const chatRequestSchema = z.object({
   messages: z.array(
     z.object({
       id: z.string().optional(),
-      role: z.enum(["user", "assistant"]),
+      role: z.enum(["user", "assistant", "system"]),
       parts: z.array(
         z.object({
           type: z.string(),
-          text: z.string().max(2000).optional(), // har part ka text
-        }),
+          text: z.string().max(2000).optional(),
+        }).passthrough(),
       ),
-    }),
+    }).passthrough(),
   ).max(50),
-});
+}).passthrough();

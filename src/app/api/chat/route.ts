@@ -1,5 +1,5 @@
 import { streamText, convertToModelMessages, type UIMessage } from "ai";
-import { google } from "@ai-sdk/google";
+import { groq } from "@ai-sdk/groq";
 import { CAREERSYNC_SYSTEM_PROMPT } from "@/app/lib/prompt";
 import { Ratelimit } from "@upstash/ratelimit";
 import { requireAuth } from "@/app/actions/Job";
@@ -49,7 +49,7 @@ export async function POST(req: Request) {
     const messages = parseData.data.messages as UIMessage[];
 
     const result = await streamText({
-      model: google("gemini-3.8-flash"),
+      model: groq('openai/gpt-oss-20b'),
       messages: await convertToModelMessages(messages),
       system: CAREERSYNC_SYSTEM_PROMPT,
     });
