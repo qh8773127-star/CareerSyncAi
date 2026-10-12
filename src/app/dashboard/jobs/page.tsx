@@ -9,7 +9,6 @@ import JobSearchFilters from "@/app/components/JobSearchFilters";
 import Pagination from "@/app/components/Pagination";
 import { getFilteredJobs } from "@/app/actions/Job";
 import AiTester from "@/app/components/AiTester";
-import DeleteAllJobsButton from "@/app/components/DeleteAllJobsButton";
 
 export default async function DashboardPage({
   searchParams,
@@ -24,13 +23,14 @@ export default async function DashboardPage({
   const { query, status, page } = await searchParams;
   const currentPage = page ? Number(page) : 1;
 
-  const statsJob = await getJobStats();
-
-  const { jobs: userJobs, totalPages } = await getFilteredJobs({
-    query: query,
-    status: status,
-    page: currentPage,
-  });
+  const [statsJob, { jobs: userJobs, totalPages }] = await Promise.all([
+    getJobStats(),
+    getFilteredJobs({
+      query,
+      status,
+      page: currentPage,
+    }),
+  ]);
 
   return (
     <div className="min-h-screen p-6 md:p-10 max-w-5xl mx-auto space-y-10">
@@ -55,7 +55,6 @@ export default async function DashboardPage({
           Your Tracked Jobs
         </h2>
         <JobSearchFilters />
-        
 
         {userJobs.length === 0 ? (
           <div className="text-center p-12 bg-white border border-dashed border-slate-300 rounded-xl">
