@@ -39,7 +39,6 @@ export default function CareerCoachPage() {
 
   return (
     <div className="flex flex-col h-[85vh] max-w-full mx-auto p-4 mt-6 border border-slate-200 rounded-xl bg-slate-50 shadow-sm">
-
       <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-white rounded-lg border border-slate-100 mb-4">
         {messages.length === 0 ? (
           <div className="text-center text-slate-400 text-sm mt-10">
@@ -73,7 +72,7 @@ export default function CareerCoachPage() {
             </div>
           ))
         )}
-        
+
         {isLoading &&
           messages.length > 0 &&
           messages[messages.length - 1].role === "user" && (
@@ -128,7 +127,7 @@ export default function CareerCoachPage() {
         <button
           type="submit"
           disabled={isLoading || !input.trim()}
-          className="bg-slate-900 text-white px-6 py-3 rounded-lg font-bold hover:bg-slate-800 transition-colors disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+          className="bg-slate-900 text-white  px-6 py-3 rounded-lg font-bold hover:bg-slate-800 transition-colors disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
         >
           {isLoading ? "..." : "Send"}
         </button>

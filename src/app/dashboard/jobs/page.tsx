@@ -34,16 +34,7 @@ export default async function DashboardPage({
 
   return (
     <div className="min-h-screen p-6 md:p-10 max-w-5xl mx-auto space-y-10">
-      <header className="flex justify-between items-center border-b sticky top-0 z-50 bg-slate-50/80 backdrop-blur-md border-slate-200 py-4 mb-4">
-        <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
-            CareerSync
-          </h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Manage and track your job applications
-          </p>
-        </div>
-        <DeleteAllJobsButton />
+      <header className="flex justify-between items-center border-b top-0 z-50 bg-slate-50/80 backdrop-blur-md border-slate-200 py-4 mb-4">
         <SignOut />
       </header>
 
@@ -64,6 +55,7 @@ export default async function DashboardPage({
           Your Tracked Jobs
         </h2>
         <JobSearchFilters />
+        
 
         {userJobs.length === 0 ? (
           <div className="text-center p-12 bg-white border border-dashed border-slate-300 rounded-xl">

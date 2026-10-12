@@ -2,6 +2,7 @@
 
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { useDebouncedCallback } from "use-debounce";
+import DeleteAllJobsButton from "./DeleteAllJobsButton";
 
 const JobSearchFilters = () => {
   const searchParams = useSearchParams();
@@ -63,6 +64,7 @@ const JobSearchFilters = () => {
           <option value="HIRED">Hired</option>
         </select>
       </div>
+      <DeleteAllJobsButton/>
     </div>
   );
 };
