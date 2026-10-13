@@ -6,6 +6,9 @@ import { requireAuth } from "@/app/actions/Job";
 import { chatRequestSchema } from "@/app/lib/validations";
 import { AppError } from "@/app/lib/Error";
 import { redis } from "@/app/lib/redis";
+import { prisma } from "@/app/lib/prisma";
+import { title } from "process";
+import { string } from "zod/v3";
 
 const ratelimit = new Ratelimit({
   redis: redis,
@@ -48,10 +51,27 @@ export async function POST(req: Request) {
 
     const messages = parseData.data.messages as UIMessage[];
 
+    const jobsData = await prisma.job.findMany({
+      where: {
+        userId,
+      },
+      select: { title: true, company: true, status: true },
+    });
+
+    const liveContext =
+      jobsData.length > 0
+        ? jobsData
+            .map(
+              (data) =>
+                `[${data.title}] at [${data.company}] (Status: ${data.status})`,
+            )
+            .join("\n")
+        : "User has not tracked any jobs yet.";
+
     const result = await streamText({
-      model: groq('openai/gpt-oss-20b'),
+      model: groq("openai/gpt-oss-120b"),
       messages: await convertToModelMessages(messages),
-      system: CAREERSYNC_SYSTEM_PROMPT,
+      system: CAREERSYNC_SYSTEM_PROMPT(liveContext),
     });
 
     return result.toUIMessageStreamResponse();
