@@ -52,8 +52,6 @@ export async function deleteAll(): Promise<ActionResult<null>> {
     return { success: true , data: null };
     revalidatePath("/dashboard");
   } catch (error) {
-    console.log(`Delete All Jobs Error ${error}`);
-
     if (error instanceof AppError) {
       return {
         success: false ,

@@ -1,4 +1,4 @@
-import { streamText, convertToModelMessages, type UIMessage } from "ai";
+import { streamText, convertToModelMessages, type UIMessage, tool,stepCountIs  } from "ai";
 import { groq } from "@ai-sdk/groq";
 import { CAREERSYNC_SYSTEM_PROMPT } from "@/app/lib/prompt";
 import { Ratelimit } from "@upstash/ratelimit";
@@ -7,8 +7,7 @@ import { chatRequestSchema } from "@/app/lib/validations";
 import { AppError } from "@/app/lib/Error";
 import { redis } from "@/app/lib/redis";
 import { prisma } from "@/app/lib/prisma";
-import { title } from "process";
-import { string } from "zod/v3";
+import { ToolCallSchema } from "@/app/lib/validations";
 
 const ratelimit = new Ratelimit({
   redis: redis,
@@ -72,6 +71,39 @@ export async function POST(req: Request) {
       model: groq("openai/gpt-oss-120b"),
       messages: await convertToModelMessages(messages),
       system: CAREERSYNC_SYSTEM_PROMPT(liveContext),
+
+      tools: {
+        updateJobStatus: tool({
+          description:
+            "Update the status of a specific tracked job application when the user requests a status change.",
+
+          inputSchema: ToolCallSchema,
+
+          execute: async ({ title, company, status }) => {
+            const updatedResult = await prisma.job.updateMany({
+              where: {
+                userId,
+                title,
+                company,
+              },
+              data: { status },
+            });
+
+            if (updatedResult.count === 0) {
+              return {
+                success: false,
+                message: "Failed: Job not found.",
+              };
+            }
+
+            return {
+              success: true,
+              message: `Success: Job status updated to ${status}.`,
+            };
+          },
+        }),
+      },
+       stopWhen: stepCountIs(3),
     });
 
     return result.toUIMessageStreamResponse();
