@@ -17,10 +17,8 @@ export default function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
-      {/* ============ HEADER ============ */}
       <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between">
-          {/* Brand */}
           <Link
             href="/dashboard/jobs"
             className="text-lg sm:text-xl font-extrabold tracking-tight text-slate-900"
@@ -28,7 +26,7 @@ export default function DashboardLayout({
             CareerSync
           </Link>
 
-          {/* Desktop Nav */}
+       
           <nav className="hidden md:flex items-center gap-1">
             {NAV_LINKS.map((link) => {
               const isActive =
@@ -51,12 +49,12 @@ export default function DashboardLayout({
         </div>
       </header>
 
-      {/* ============ MAIN ============ */}
+  
       <main className="flex-1 w-full max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-8 pb-24 md:pb-8">
         {children}
       </main>
 
-      {/* ============ MOBILE BOTTOM NAV ============ */}
+    
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-200">
         <div className="flex items-center h-16">
           {NAV_LINKS.map((link) => {
