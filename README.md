@@ -1,36 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CareerSync AI
 
-## Getting Started
+An AI-powered job tracker with a personal career coach. Built with Next.js, Prisma, and Groq.
 
-First, run the development server:
+![Dashboard](./screenshots/dashboard.png)
+![AI Coach](./screenshots/coach.png)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## ✨ Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **AI Job Extraction** — Extract role, company, skills, and salary from raw job descriptions
+- **AI Career Coach** — Streaming chat for resume review, interview prep, and career advice
+- **Application Tracking** — Track jobs through PENDING → INTERVIEW → REJECTED → HIRED
+- **OAuth Authentication** — Sign in with Google/GitHub via NextAuth
+- **Rate Limiting** — Abuse prevention on every AI endpoint (Upstash Redis)
+- **Production-Ready** — Zod validation, structured error codes, race condition prevention
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 🛠 Tech Stack
 
-To learn more about Next.js, take a look at the following resources:
+**Frontend**
+- Next.js 15 (App Router)
+- React 19
+- TypeScript
+- Tailwind CSS
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+**Backend**
+- Prisma ORM
+- PostgreSQL (Neon)
+- NextAuth (OAuth + sessions)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+**AI**
+- Vercel AI SDK
+- Groq (gpt-oss-20b for extraction, gpt-oss-120b for chat)
+- Zod schemas for structured output
 
-## Deploy on Vercel
+**Infrastructure**
+- Upstash Redis (rate limiting)
+- Vercel (deployment)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🚀 Status
+
+**In development.** MVP shipping soon.
+
+Follow progress on [LinkedIn](https://www.linkedin.com/in/ali-haider-17015734a/).
+
+---
+
+## 📸 Screenshots
+
+Coming soon.
+
+---
+
+## 🔗 Links
+
+- [GitHub] (https://github.com/qh8773127-star?tab=repositories)
+- [LinkedIn](https://www.linkedin.com/in/ali-haider-17015734a/)
