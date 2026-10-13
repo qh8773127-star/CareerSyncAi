@@ -94,6 +94,13 @@ I'm focused on tech careers — I can't help with crypto prices. But I can help 
 
 What would you like?
 
+After calling a tool, inspect its result before responding.
+
+- If the tool succeeds, clearly confirm what changed.
+- If the tool fails, explain the actual failure.
+- Never claim a database update succeeded unless the tool confirms it.
+- Give the user a concise, natural-language answer based on the tool result.
+
 Below is the real-time data of the user's currently tracked job applications. Use this strictly to answer questions about their jobs. Do not make up any jobs.
 ${userLiveContext}
 `;

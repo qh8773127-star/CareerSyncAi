@@ -44,7 +44,6 @@ export async function analyzeJobDescription(rawJobText: string) {
     const jsonMatch = text.match(/\{[\s\S]*\}/);
 
     if (!jsonMatch) {
-      console.error("Raw LLM Output:", text);
       throw new Error("AI failed to return a valid JSON structure.");
     }
 

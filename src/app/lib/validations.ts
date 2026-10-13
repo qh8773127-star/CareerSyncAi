@@ -91,17 +91,33 @@ export const jobAnalysisSchema = z.object({
 });
 export type JobAnalysisResult = z.infer<typeof jobAnalysisSchema>;
 
-export const chatRequestSchema = z.object({
-  messages: z.array(
-    z.object({
-      id: z.string().optional(),
-      role: z.enum(["user", "assistant", "system"]),
-      parts: z.array(
-        z.object({
-          type: z.string(),
-          text: z.string().max(2000).optional(),
-        }).passthrough(),
-      ),
-    }).passthrough(),
-  ).max(50),
-}).passthrough();
+export const chatRequestSchema = z
+  .object({
+    messages: z
+      .array(
+        z
+          .object({
+            id: z.string().optional(),
+            role: z.enum(["user", "assistant", "system"]),
+            parts: z.array(
+              z
+                .object({
+                  type: z.string(),
+                  text: z.string().max(2000).optional(),
+                })
+                .passthrough(),
+            ),
+          })
+          .passthrough(),
+      )
+      .max(50),
+  })
+  .passthrough();
+
+export const ToolCallSchema = z.object({
+  title: z.string().describe("search this title in the jobstats"),
+  company: z.string().describe("search this company alos in jobstats"),
+  status: z
+    .enum(JobStatus)
+    .describe("The exact new status"),
+});
