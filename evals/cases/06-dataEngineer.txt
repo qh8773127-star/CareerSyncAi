@@ -1,0 +1,47 @@
+# Data Engineer
+
+**Company:** DataPulse Analytics  
+**Location:** Dubai, UAE (On-site)  
+**Employment Type:** Full-Time  
+**Experience:** 3–5 years  
+**Salary:** AED 18,000–25,000 per month
+
+## About the Role
+DataPulse Analytics is seeking a Data Engineer to design, develop, and maintain reliable data pipelines and scalable data platforms. You will work with data scientists, analysts, and software engineers to transform raw data into high-quality datasets that support business intelligence, analytics, and machine learning initiatives.
+
+## Responsibilities
+- Build and maintain ETL and ELT pipelines using Python and SQL.
+- Design and optimize data models in PostgreSQL and Snowflake.
+- Develop batch and streaming data workflows using Apache Spark and Apache Kafka.
+- Orchestrate data pipelines using Apache Airflow.
+- Implement data validation, quality checks, and monitoring.
+- Integrate data from APIs, relational databases, and external data sources.
+- Optimize query performance and data warehouse costs.
+- Maintain data documentation, lineage, and access controls.
+- Collaborate with analytics and machine learning teams to deliver trusted datasets.
+- Deploy data infrastructure and pipelines using cloud services.
+
+## Required Qualifications
+- 3–5 years of professional data engineering experience.
+- Strong proficiency in Python and SQL.
+- Experience building production-grade ETL/ELT pipelines.
+- Practical knowledge of PostgreSQL and data warehouse concepts.
+- Experience with Apache Airflow or a similar workflow orchestration tool.
+- Understanding of data modeling, schema design, and query optimization.
+- Familiarity with distributed data processing and data quality practices.
+- Experience with Git and collaborative software development workflows.
+
+## Preferred Qualifications
+- Experience with Snowflake, Databricks, or Amazon Redshift.
+- Knowledge of Apache Spark and Apache Kafka.
+- Experience with AWS or Azure data services.
+- Familiarity with dbt and data transformation testing.
+- Understanding of dimensional modeling and slowly changing dimensions.
+
+## Benefits
+- Medical insurance.
+- Annual performance bonus.
+- Relocation assistance for eligible candidates.
+- Professional development and certification support.
+
+**How to Apply:** Submit your CV and a brief description of a data pipeline or data platform you have built or maintained.

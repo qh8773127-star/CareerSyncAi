@@ -1,0 +1,25 @@
+{
+  "role": "Senior Software Engineer — Remote",
+  "company": "GlobalStack Inc.",
+  "location": "Remote",
+  "salaryRange": "USD 120,000–160,000 per year",
+  "experienceLevel": "SENIOR",
+  "jobType": "FULL_TIME",
+  "skills": [
+    "Python",
+    "FastAPI",
+    "Django",
+    "PostgreSQL",
+    "SQL",
+    "REST API",
+    "Docker",
+    "AWS",
+    "CI/CD",
+    "Redis",
+    "RabbitMQ",
+    "Kubernetes",
+    "Terraform",
+    "OpenTelemetry"
+  ],
+  "summary": "GlobalStack Inc. is seeking an experienced Software Engineer to design, develop, and maintain scalable backend services using Python and FastAPI. The remote-first role involves building RESTful APIs, optimizing PostgreSQL databases, and deploying applications on Docker and AWS."
+}

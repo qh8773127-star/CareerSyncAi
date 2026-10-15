@@ -1,0 +1,28 @@
+{
+  "role": "Backend Engineer",
+  "company": "CloudBridge Technologies",
+  "location": "Islamabad, Pakistan",
+  "salaryRange": "PKR 250,000–400,000 per month",
+  "experienceLevel": "MID",
+  "jobType": "FULL_TIME",
+  "skills": [
+    "Node.js",
+    "TypeScript",
+    "Express.js",
+    "NestJS",
+    "PostgreSQL",
+    "SQL",
+    "REST API",
+    "JWT",
+    "OAuth 2.0",
+    "Redis",
+    "Git",
+    "Docker",
+    "RabbitMQ",
+    "Kafka",
+    "AWS",
+    "Azure",
+    "JavaScript"
+  ],
+  "summary": "CloudBridge Technologies is seeking an experienced Backend Engineer to design, develop, and maintain scalable server-side applications. The ideal candidate will have strong programming fundamentals, database expertise, and experience building secure, reliable APIs."
+}

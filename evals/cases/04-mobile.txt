@@ -1,0 +1,45 @@
+# Mobile Application Developer
+
+**Company:** AppNova Digital  
+**Location:** Karachi, Pakistan (Hybrid)  
+**Employment Type:** Full-Time  
+**Experience:** 2–3 years  
+**Salary:** PKR 180,000–300,000 per month
+
+## About the Role
+AppNova Digital is seeking a Mobile Application Developer to build, test, and maintain high-quality mobile applications for iOS and Android. The ideal candidate has experience with React Native, TypeScript, and native mobile development concepts, with a strong focus on performance, accessibility, and user experience.
+
+## Responsibilities
+- Develop cross-platform mobile applications using React Native and TypeScript.
+- Build reusable components and maintain a scalable application architecture.
+- Integrate REST APIs and third-party mobile services.
+- Manage application state using Redux Toolkit or React Context.
+- Implement secure authentication and local data storage.
+- Debug performance issues across Android and iOS devices.
+- Write unit tests and participate in automated testing.
+- Collaborate with designers, backend engineers, and QA teams.
+- Prepare application builds and assist with App Store and Google Play releases.
+
+## Required Qualifications
+- 2–3 years of mobile application development experience.
+- Strong knowledge of JavaScript and TypeScript.
+- Hands-on experience with React Native.
+- Understanding of React hooks, component lifecycle, and state management.
+- Experience integrating REST APIs.
+- Familiarity with Git and mobile debugging tools.
+- Understanding of mobile navigation, responsive layouts, and application lifecycle management.
+
+## Preferred Qualifications
+- Experience with Swift and native iOS development.
+- Familiarity with Kotlin and native Android development.
+- Experience with Expo, Firebase, and push notifications.
+- Knowledge of mobile application security and performance profiling.
+- Familiarity with App Store Connect and Google Play Console.
+
+## Benefits
+- Medical coverage.
+- Paid annual leave.
+- Flexible hybrid working.
+- Budget for professional training and certifications.
+
+**How to Apply:** Submit your CV and links to published mobile applications or GitHub projects demonstrating your React Native experience.

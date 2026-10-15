@@ -1,0 +1,47 @@
+# Full-Stack Developer
+
+**Company:** DevSphere Technologies  
+**Location:** Remote (Pakistan)  
+**Employment Type:** Full-Time  
+**Experience:** 2–4 years  
+**Salary:** PKR 200,000–350,000 per month
+
+## About the Role
+DevSphere Technologies is looking for a Full-Stack Developer to build and maintain modern web applications across frontend and backend systems. The ideal candidate can develop intuitive user interfaces, design reliable APIs, and manage database integrations while collaborating with a cross-functional engineering team.
+
+## Responsibilities
+- Develop responsive user interfaces using React and Next.js.
+- Build server-side applications and REST APIs using Node.js and Express.js.
+- Design and maintain relational database schemas using PostgreSQL.
+- Implement database access and migrations using Prisma ORM.
+- Integrate third-party APIs and payment services.
+- Implement secure authentication and role-based authorization.
+- Write automated tests and maintain application reliability.
+- Optimize frontend performance and backend response times.
+- Use Git and GitHub for version control and collaboration.
+- Participate in code reviews, sprint planning, and technical discussions.
+
+## Required Qualifications
+- 2–4 years of full-stack web development experience.
+- Strong knowledge of JavaScript and TypeScript.
+- Practical experience with React and Next.js.
+- Backend development experience with Node.js and Express.js.
+- Knowledge of PostgreSQL, SQL, and database design.
+- Experience building and integrating REST APIs.
+- Familiarity with Prisma ORM and Git-based workflows.
+- Understanding of authentication, authorization, and web security.
+- Ability to troubleshoot issues across frontend and backend systems.
+
+## Preferred Qualifications
+- Experience with Docker and CI/CD pipelines.
+- Familiarity with cloud platforms such as AWS or Vercel.
+- Knowledge of automated testing with Jest or Playwright.
+- Experience with Redis caching and application performance monitoring.
+
+## Benefits
+- Fully remote working arrangements.
+- Flexible working hours.
+- Annual performance reviews.
+- Learning and development allowance.
+
+**How to Apply:** Submit your CV, GitHub profile, and portfolio demonstrating at least one complete full-stack application.

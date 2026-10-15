@@ -1,0 +1,20 @@
+{
+  "role": "Software Engineering Intern",
+  "company": "ByteCraft Labs",
+  "location": "Lahore, Pakistan",
+  "salaryRange": "PKR 30,000–50,000 per month",
+  "experienceLevel": "ENTRY",
+  "jobType": "INTERNSHIP",
+  "skills": [
+    "HTML",
+    "CSS",
+    "JavaScript",
+    "React",
+    "REST APIs",
+    "Node.js",
+    "Git",
+    "GitHub",
+    "VS Code"
+  ],
+  "summary": "ByteCraft Labs is offering a Software Engineering Internship for students and recent graduates to gain hands-on experience building web applications. Interns will collaborate with experienced engineers, contribute to real projects, and learn industry-standard development practices."
+}

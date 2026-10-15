@@ -1,0 +1,28 @@
+{
+  "role": "DevOps Engineer / Site Reliability Engineer",
+  "company": "InfraCloud Systems",
+  "location": "Remote",
+  "salaryRange": "PKR 300,000–500,000 per month",
+  "experienceLevel": "SENIOR",
+  "jobType": "FULL_TIME",
+  "skills": [
+    "CI/CD",
+    "GitHub Actions",
+    "Jenkins",
+    "Docker",
+    "Kubernetes",
+    "AWS",
+    "Terraform",
+    "Python",
+    "Bash",
+    "Prometheus",
+    "Grafana",
+    "Linux",
+    "Azure",
+    "Google Cloud Platform",
+    "Helm",
+    "Argo CD",
+    "OpenTelemetry"
+  ],
+  "summary": "InfraCloud Systems is looking for a DevOps Engineer with strong Site Reliability Engineering (SRE) skills to build and maintain secure, scalable cloud infrastructure and CI/CD pipelines. The role involves automating deployments, monitoring services, and ensuring high availability and reliability."
+}

@@ -1,0 +1,24 @@
+{
+  "role": "Data Engineer",
+  "company": "DataPulse Analytics",
+  "location": "Dubai, UAE",
+  "salaryRange": "AED 18,000–25,000 per month",
+  "experienceLevel": "MID",
+  "jobType": "FULL_TIME",
+  "skills": [
+    "Python",
+    "SQL",
+    "PostgreSQL",
+    "Snowflake",
+    "Apache Spark",
+    "Apache Kafka",
+    "Apache Airflow",
+    "Git",
+    "Databricks",
+    "Amazon Redshift",
+    "AWS",
+    "Azure",
+    "dbt"
+  ],
+  "summary": "DataPulse Analytics is seeking a Data Engineer to design and maintain data pipelines and scalable data platforms. The role involves transforming raw data into high-quality datasets for business intelligence, analytics, and machine learning initiatives."
+}

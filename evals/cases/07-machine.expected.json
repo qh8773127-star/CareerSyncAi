@@ -1,0 +1,32 @@
+{
+  "role": "Machine Learning Engineer",
+  "company": "NeuralWorks AI",
+  "location": "Toronto, Canada",
+  "salaryRange": "CAD 120,000–160,000 per year",
+  "experienceLevel": "MID",
+  "jobType": "FULL_TIME",
+  "skills": [
+    "Python",
+    "PyTorch",
+    "TensorFlow",
+    "scikit-learn",
+    "pandas",
+    "NumPy",
+    "FastAPI",
+    "REST API",
+    "CI/CD",
+    "Git",
+    "Docker",
+    "Kubernetes",
+    "MLflow",
+    "Weights & Biases",
+    "MLOps",
+    "LLMs",
+    "Embeddings",
+    "RAG",
+    "AWS",
+    "Azure",
+    "Google Cloud Platform"
+  ],
+  "summary": "NeuralWorks AI is looking for a Machine Learning Engineer to develop, deploy, and maintain production-grade machine learning systems. The role involves collaborating with data scientists, software engineers, and product teams to transform experimental models into scalable applications."
+}

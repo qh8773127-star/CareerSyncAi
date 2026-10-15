@@ -1,0 +1,51 @@
+# Senior Software Engineer — Remote
+
+**Company:** GlobalStack Inc.  
+**Location:** Remote — Worldwide (eligible countries only)  
+**Employment Type:** Full-Time  
+**Experience:** 5+ years  
+**Salary:** USD 120,000–160,000 per year
+
+## About the Role
+GlobalStack Inc. is seeking an experienced Software Engineer to build and maintain scalable distributed applications for an international customer base. This is a remote-first role involving collaboration across multiple time zones. Candidates must reside in a country where the company can legally employ or contract workers.
+
+## Responsibilities
+- Design, develop, and maintain scalable backend services using Python and FastAPI.
+- Build RESTful APIs and integrate third-party services.
+- Design and optimize PostgreSQL databases and complex SQL queries.
+- Develop asynchronous background tasks and event-driven workflows.
+- Implement authentication, authorization, and application security controls.
+- Write unit, integration, and end-to-end tests.
+- Deploy and operate applications using Docker and AWS.
+- Establish monitoring, logging, and alerting for production services.
+- Participate in architecture reviews and mentor junior engineers.
+- Collaborate with distributed teams using written documentation and asynchronous communication.
+
+## Required Qualifications
+- At least 5 years of professional software engineering experience.
+- Strong proficiency in Python and backend application development.
+- Production experience with FastAPI, Django, or a comparable backend framework.
+- Strong knowledge of PostgreSQL, SQL, and database optimization.
+- Experience designing and maintaining REST APIs.
+- Familiarity with Docker, AWS, and CI/CD pipelines.
+- Understanding of distributed systems, application security, and automated testing.
+- Excellent written English and the ability to work independently across time zones.
+
+## Preferred Qualifications
+- Experience with Redis and message brokers such as RabbitMQ.
+- Familiarity with Kubernetes and Terraform.
+- Experience with observability tools such as OpenTelemetry.
+- Contributions to open-source projects.
+- Experience working with international, remote-first engineering teams.
+
+## Benefits
+- Competitive USD-denominated compensation.
+- Flexible working hours with reasonable overlap across time zones.
+- Annual professional development allowance.
+- Paid time off.
+- Home-office equipment allowance, subject to company policy.
+
+## Important Employment Conditions
+This position is remote, but it is not automatically available in every country. Employment eligibility, payroll arrangements, tax requirements, and any contractor agreements will depend on the candidate's country of residence.
+
+**How to Apply:** Submit your CV, GitHub profile, and examples of backend systems you have developed or maintained.

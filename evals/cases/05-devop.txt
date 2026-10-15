@@ -1,0 +1,48 @@
+# DevOps Engineer / Site Reliability Engineer
+
+**Company:** InfraCloud Systems  
+**Location:** Remote (Pakistan)  
+**Employment Type:** Full-Time  
+**Experience:** 4–6 years  
+**Salary:** PKR 300,000–500,000 per month
+
+## About the Role
+InfraCloud Systems is looking for a DevOps Engineer with strong Site Reliability Engineering (SRE) skills to improve deployment automation, infrastructure reliability, and system performance. You will work with development and operations teams to build secure, scalable cloud infrastructure and maintain highly available services.
+
+## Responsibilities
+- Design and maintain CI/CD pipelines using GitHub Actions and Jenkins.
+- Containerize applications using Docker and manage workloads with Kubernetes.
+- Provision and maintain cloud infrastructure on AWS.
+- Automate infrastructure provisioning using Terraform.
+- Develop automation scripts using Python and Bash.
+- Configure monitoring, logging, and alerting using Prometheus and Grafana.
+- Investigate production incidents and perform root cause analysis.
+- Improve system availability, latency, and resource utilization.
+- Implement infrastructure security, access controls, and backup strategies.
+- Participate in on-call rotations and incident response procedures.
+
+## Required Qualifications
+- 4–6 years of experience in DevOps, infrastructure engineering, or SRE.
+- Strong knowledge of Linux administration and networking fundamentals.
+- Hands-on experience with Docker and Kubernetes.
+- Experience building CI/CD pipelines.
+- Practical experience with AWS cloud services.
+- Knowledge of Terraform and infrastructure as code.
+- Proficiency in Python or Bash scripting.
+- Experience with monitoring, logging, and production troubleshooting.
+- Understanding of high availability, disaster recovery, and security best practices.
+
+## Preferred Qualifications
+- Experience with Azure or Google Cloud Platform (GCP).
+- Familiarity with Helm and Argo CD.
+- Knowledge of OpenTelemetry and distributed tracing.
+- Experience defining service-level objectives (SLOs) and service-level indicators (SLIs).
+- Relevant AWS or Kubernetes certifications.
+
+## Benefits
+- Remote-first working environment.
+- Medical insurance.
+- Annual learning budget.
+- Paid leave and on-call compensation.
+
+**How to Apply:** Submit your CV and describe a production infrastructure project where you improved reliability, deployment speed, or system performance.

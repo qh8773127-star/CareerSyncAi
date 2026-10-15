@@ -1,0 +1,26 @@
+{
+  "role": "Mobile Application Developer",
+  "company": "AppNova Digital",
+  "location": "Karachi, Pakistan",
+  "salaryRange": "PKR 180,000–300,000 per month",
+  "experienceLevel": "MID",
+  "jobType": "FULL_TIME",
+  "skills": [
+    "React Native",
+    "TypeScript",
+    "JavaScript",
+    "iOS",
+    "Android",
+    "REST API",
+    "Redux Toolkit",
+    "React Context",
+    "Git",
+    "Swift",
+    "Kotlin",
+    "Expo",
+    "Firebase",
+    "App Store Connect",
+    "Google Play Console"
+  ],
+  "summary": "AppNova Digital is seeking a Mobile Application Developer to build, test, and maintain high-quality iOS and Android applications using React Native, TypeScript, and native mobile development concepts. The role focuses on performance, accessibility, and user experience while collaborating with cross-functional teams."
+}

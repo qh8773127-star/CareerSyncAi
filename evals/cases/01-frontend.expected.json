@@ -1,0 +1,26 @@
+{
+  "role": "Frontend Developer",
+  "company": "NovaTech Solutions",
+  "location": "Lahore, Pakistan",
+  "salaryRange": "PKR 180,000–250,000 per month",
+  "experienceLevel": "MID",
+  "jobType": "FULL_TIME",
+  "skills": [
+    "React",
+    "Next.js",
+    "TypeScript",
+    "Tailwind CSS",
+    "REST APIs",
+    "Jest",
+    "React Testing Library",
+    "HTML5",
+    "CSS3",
+    "JavaScript",
+    "Git",
+    "GitHub",
+    "npm",
+    "Playwright",
+    "Cypress"
+  ],
+  "summary": "NovaTech Solutions is seeking a Frontend Developer to build responsive, accessible, and high-performance web applications. The role involves collaborating with UI/UX designers, backend engineers, and product managers to deliver reliable user experiences."
+}
