@@ -1,0 +1,30 @@
+{
+  "role": "Full-Stack Developer",
+  "company": "DevSphere Technologies",
+  "location": "Remote",
+  "salaryRange": "PKR 200,000–350,000 per month",
+  "experienceLevel": "MID",
+  "jobType": "FULL_TIME",
+  "skills": [
+    "React",
+    "Next.js",
+    "Node.js",
+    "Express.js",
+    "PostgreSQL",
+    "Prisma ORM",
+    "JavaScript",
+    "TypeScript",
+    "SQL",
+    "REST API",
+    "Git",
+    "GitHub",
+    "Docker",
+    "CI/CD",
+    "AWS",
+    "Vercel",
+    "Jest",
+    "Playwright",
+    "Redis"
+  ],
+  "summary": "DevSphere Technologies seeks a Full-Stack Developer to design and build modern web applications using React, Next.js, Node.js, and PostgreSQL. The role involves developing responsive interfaces, creating REST APIs, and maintaining database integrations while collaborating with cross-functional engineering teams."
+}

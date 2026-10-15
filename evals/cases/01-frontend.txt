@@ -1,0 +1,43 @@
+# Frontend Developer
+
+**Company:** NovaTech Solutions  
+**Location:** Lahore, Pakistan (Hybrid)  
+**Employment Type:** Full-Time  
+**Experience:** 2–3 years  
+**Salary:** PKR 180,000–250,000 per month
+
+## About the Role
+NovaTech Solutions is looking for a skilled Frontend Developer to build responsive, accessible, and high-performance web applications. You will collaborate with UI/UX designers, backend engineers, and product managers to deliver reliable user experiences.
+
+## Responsibilities
+- Develop responsive web interfaces using React and Next.js.
+- Build reusable components using TypeScript and Tailwind CSS.
+- Integrate REST APIs and handle loading, error, and empty states.
+- Optimize application performance, accessibility, and SEO.
+- Write unit and integration tests using Jest and React Testing Library.
+- Collaborate with backend developers to define API contracts.
+- Participate in code reviews and maintain clean, documented code.
+- Troubleshoot browser compatibility and production UI issues.
+
+## Required Qualifications
+- 2–3 years of professional frontend development experience.
+- Strong knowledge of HTML5, CSS3, JavaScript, and TypeScript.
+- Hands-on experience with React and Next.js.
+- Understanding of responsive design and web accessibility.
+- Experience integrating REST APIs and managing application state.
+- Familiarity with Git, GitHub, npm, and modern build tools.
+- Knowledge of browser developer tools and debugging techniques.
+
+## Preferred Qualifications
+- Experience with server-side rendering and static site generation.
+- Familiarity with Playwright or Cypress.
+- Understanding of Core Web Vitals and frontend security.
+- Experience working in Agile development teams.
+
+## Benefits
+- Medical coverage.
+- Paid annual leave.
+- Professional development budget.
+- Flexible hybrid working arrangements.
+
+**How to Apply:** Submit your CV and portfolio, including links to at least two React or Next.js projects, through the company's careers portal.

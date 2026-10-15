@@ -1,0 +1,45 @@
+# Backend Engineer
+
+**Company:** CloudBridge Technologies  
+**Location:** Islamabad, Pakistan (On-site)  
+**Employment Type:** Full-Time  
+**Experience:** 3–5 years  
+**Salary:** PKR 250,000–400,000 per month
+
+## About the Role
+CloudBridge Technologies is seeking an experienced Backend Engineer to design, develop, and maintain scalable server-side applications. The ideal candidate will have strong programming fundamentals, database expertise, and experience building secure, reliable APIs.
+
+## Responsibilities
+- Design and implement RESTful APIs using Node.js and TypeScript.
+- Develop backend services using Express.js and NestJS.
+- Design database schemas and optimize queries in PostgreSQL.
+- Implement authentication and authorization using JWT and OAuth 2.0.
+- Integrate Redis for caching and performance optimization.
+- Write unit and integration tests for backend services.
+- Monitor application performance and troubleshoot production issues.
+- Collaborate with frontend developers, QA engineers, and product managers.
+- Follow secure coding practices and participate in code reviews.
+
+## Required Qualifications
+- 3–5 years of professional backend development experience.
+- Strong knowledge of JavaScript, TypeScript, and Node.js.
+- Experience with Express.js or NestJS.
+- Proficiency in PostgreSQL and SQL query optimization.
+- Understanding of REST API design and HTTP protocols.
+- Experience with authentication, authorization, and API security.
+- Familiarity with Git, Docker, and automated testing.
+- Knowledge of asynchronous programming and error handling.
+
+## Preferred Qualifications
+- Experience with Redis caching.
+- Familiarity with message queues such as RabbitMQ or Kafka.
+- Experience deploying applications to AWS or Azure.
+- Understanding of microservices architecture and observability.
+
+## Benefits
+- Medical insurance.
+- Paid annual leave.
+- Performance-based bonuses.
+- Training and professional development opportunities.
+
+**How to Apply:** Submit your CV and links to relevant backend projects through the CloudBridge Technologies careers portal.

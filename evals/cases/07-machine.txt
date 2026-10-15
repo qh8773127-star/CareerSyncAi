@@ -1,0 +1,47 @@
+# Machine Learning Engineer
+
+**Company:** NeuralWorks AI  
+**Location:** Toronto, Canada (Hybrid)  
+**Employment Type:** Full-Time  
+**Experience:** 3–5 years  
+**Salary:** CAD 120,000–160,000 per year
+
+## About the Role
+NeuralWorks AI is looking for a Machine Learning Engineer to develop, deploy, and maintain production-grade machine learning systems. You will collaborate with data scientists, software engineers, and product teams to transform experimental models into scalable applications that solve real-world business problems.
+
+## Responsibilities
+- Develop and evaluate machine learning models using Python.
+- Build model training and inference pipelines using PyTorch and scikit-learn.
+- Process and analyze structured and unstructured datasets using pandas and NumPy.
+- Design feature engineering workflows and conduct model performance evaluations.
+- Deploy models as REST APIs using FastAPI.
+- Build reproducible ML pipelines and manage model versions.
+- Monitor deployed models for accuracy degradation and data drift.
+- Implement automated testing and CI/CD workflows for machine learning systems.
+- Collaborate with data engineers to maintain reliable data pipelines.
+- Document experiments, model limitations, and deployment procedures.
+
+## Required Qualifications
+- 3–5 years of professional experience in machine learning or applied AI engineering.
+- Strong programming skills in Python.
+- Solid understanding of statistics, probability, and core machine learning algorithms.
+- Hands-on experience with PyTorch or TensorFlow.
+- Experience with scikit-learn and model evaluation techniques.
+- Knowledge of data preprocessing, feature engineering, and model validation.
+- Experience deploying models through APIs or production services.
+- Familiarity with Git, testing practices, and software engineering principles.
+
+## Preferred Qualifications
+- Experience with MLflow or Weights & Biases for experiment tracking.
+- Familiarity with Docker and Kubernetes.
+- Knowledge of MLOps practices and model monitoring.
+- Experience with large language models (LLMs), embeddings, or retrieval-augmented generation (RAG).
+- Familiarity with cloud ML services on AWS, Azure, or Google Cloud Platform.
+
+## Benefits
+- Competitive compensation and annual performance bonuses.
+- Health and dental coverage.
+- Flexible hybrid work arrangements.
+- Annual learning and conference budget.
+
+**How to Apply:** Submit your CV, GitHub profile, and examples of machine learning projects, including at least one model deployed in a production-like environment.

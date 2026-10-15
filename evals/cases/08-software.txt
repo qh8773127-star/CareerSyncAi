@@ -1,0 +1,50 @@
+# Software Engineering Intern
+
+**Company:** ByteCraft Labs  
+**Location:** Lahore, Pakistan (On-site)  
+**Employment Type:** Internship  
+**Experience:** No professional experience required  
+**Duration:** 3 months  
+**Salary:** PKR 30,000–50,000 per month
+
+## About the Role
+ByteCraft Labs is offering a Software Engineering Internship for students and recent graduates who want practical experience developing web applications. Interns will work alongside experienced engineers, contribute to real projects, and learn industry-standard software development practices.
+
+## Responsibilities
+- Assist in developing user interfaces using HTML, CSS, and JavaScript.
+- Help build and maintain React components.
+- Support backend API integration and basic debugging.
+- Write clean, readable code under the guidance of senior developers.
+- Participate in code reviews and team meetings.
+- Write basic unit tests and fix reported bugs.
+- Use Git and GitHub to manage source code.
+- Document implementation details and technical issues.
+
+## Requirements
+- Currently enrolled in or recently graduated from a computer science, information technology, or related degree program.
+- Basic understanding of HTML, CSS, and JavaScript.
+- Familiarity with React is beneficial but not mandatory.
+- Basic knowledge of programming fundamentals and problem-solving.
+- Willingness to learn new technologies and work collaboratively.
+- Familiarity with Git or GitHub is an advantage.
+
+## Preferred Qualifications
+- Personal projects built with React.
+- Basic knowledge of REST APIs.
+- Familiarity with Node.js.
+- Experience using VS Code or similar development tools.
+
+## What You Will Learn
+- Practical frontend development workflows.
+- Component-based application development.
+- Version control and collaborative coding.
+- Debugging, testing, and code review practices.
+- Professional communication within an engineering team.
+
+## Benefits
+- Monthly internship stipend.
+- Mentorship from experienced developers.
+- Certificate of completion.
+- Potential full-time employment based on performance and business needs.
+
+**How to Apply:** Submit your CV, educational details, and GitHub profile or links to personal projects. Applicants without professional experience are encouraged to apply.
