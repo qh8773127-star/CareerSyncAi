@@ -33,12 +33,12 @@ model Job {
   company         String   
   
   // AI Fields
-  skills          String[] 
-  experienceLevel String   
-  summary         String
-  location        String
-  salaryRange     String
-  jobType         String
+  skills          String[]
+  experienceLevel String?   
+  summary         String?
+  location        String?
+  salaryRange     String?
+  jobType         String?
 
   status          JobStatus @default(PENDING)
   userId          String
