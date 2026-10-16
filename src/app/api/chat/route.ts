@@ -1,4 +1,10 @@
-import { streamText, convertToModelMessages, type UIMessage, tool,stepCountIs  } from "ai";
+import {
+  streamText,
+  convertToModelMessages,
+  type UIMessage,
+  tool,
+  stepCountIs,
+} from "ai";
 import { groq } from "@ai-sdk/groq";
 import { CAREERSYNC_SYSTEM_PROMPT } from "@/app/lib/prompt";
 import { Ratelimit } from "@upstash/ratelimit";
@@ -7,7 +13,10 @@ import { chatRequestSchema } from "@/app/lib/validations";
 import { AppError } from "@/app/lib/Error";
 import { redis } from "@/app/lib/redis";
 import { prisma } from "@/app/lib/prisma";
-import { ToolCallSchema } from "@/app/lib/validations";
+import {
+  ToolSchemaForJobStats,
+  ToolSchemaForAddJob,
+} from "@/app/lib/validations";
 
 const ratelimit = new Ratelimit({
   redis: redis,
@@ -77,7 +86,7 @@ export async function POST(req: Request) {
           description:
             "Update the status of a specific tracked job application when the user requests a status change.",
 
-          inputSchema: ToolCallSchema,
+          inputSchema: ToolSchemaForJobStats,
 
           execute: async ({ title, company, status }) => {
             const updatedResult = await prisma.job.updateMany({
@@ -102,8 +111,62 @@ export async function POST(req: Request) {
             };
           },
         }),
+        addJobApplication: tool({
+          description:
+            "Add a new job application to the user's tracker when they mention applying to a specific job or company. USE THIS TOOL WHEN User says they applied to a job (e.g., I applied to X at Y) -User says they submitted an application - User mentions sending a resume to a company - User says add this job with a role and company User mentions I want to track this job DO NOT USE:- When user is just asking a question about jobs - When user is asking for advice- When user mentions a job without saying they applied- When user asks about existing jobs (use search instead) EXTRACT FROM USER'S MESSAGE: - title: The role/position (e.g., Backend Developer)- company: The company name (e.g., Microsoft)- location: If mentioned (e.g., Lahore)- title OR company is missing from the user's message, do NOT guess — ask the user for clarification first DO NOT ask the user for confirmation about status, location, jobType, or experience. If the user provides the 'title' and 'company', you MUST execute this tool immediately. Use defaults for any missing information.",
+          inputSchema: ToolSchemaForAddJob,
+          execute: async ({
+            title,
+            company,
+            jobType,
+            experienceLevel,
+            location,
+            skills,
+            status
+          }) => {
+            try {
+              const skillsArray = skills
+                ? skills
+                    .split(",")
+                    .map((s) => s.trim())
+                    .filter(Boolean) 
+                    .filter(
+                      (s, i, arr) =>
+                        arr.findIndex(
+                          (x) => x.toLowerCase() === s.toLowerCase(),
+                        ) === i,
+                    )
+                : [];
+
+              const addJob = await prisma.job.create({
+                data: {
+                  userId,
+                  title,
+                  company,
+                  skills: skillsArray,
+                  jobType: jobType || "FULL_TIME",
+                  experienceLevel: experienceLevel || "Not Specified",
+                  location: location || "Not Specified",
+                  summary: "Not Provided",
+                  salaryRange: "Not Provided",
+                  status: status || "PENDING",
+                },
+              });
+              return {
+                success: true,
+                jobId: addJob.id,
+                message: `Success: Added new job ${title} at ${company} with status ${status}.`,
+              };
+            } catch (error) {
+              return {
+                success: false,
+                message: `Failed to add job application to the database.${error}`,
+              };
+            }
+          },
+        }),
       },
-       stopWhen: stepCountIs(3),
+      stopWhen: stepCountIs(3),
     });
 
     return result.toUIMessageStreamResponse();

@@ -1,4 +1,4 @@
-import { z } from "zod";
+import {  z } from "zod";
 import { JobStatus } from "@prisma/client";
 
 export const createJobSchema = z.object({
@@ -14,13 +14,14 @@ export const createJobSchema = z.object({
     .string()
     .trim()
     .min(2, "Location is too short")
-    .max(100, "Location is too long"),
+    .max(100, "Location is too long")
+    .optional(),
 
-  skills: z.string().trim().min(1, "Please add at least one skill"),
+  skills: z.string().trim().min(1, "Please add at least one skill").optional(),
 
-  experienceLevel: z.enum(["ENTRY", "MID", "SENIOR"]),
+  experienceLevel: z.enum(["ENTRY", "MID", "SENIOR"]).optional(),
 
-  jobType: z.enum(["PART_TIME", "FULL_TIME", "CONTRACT", "INTERNSHIP"]),
+  jobType: z.enum(["PART_TIME", "FULL_TIME", "CONTRACT", "INTERNSHIP"]).optional(),
 });
 
 export const jobIdSchema = z.string().uuid("Invalid Job ID format");
@@ -49,14 +50,17 @@ export const jobAnalysisSchema = z.object({
 
   skills: z
     .array(z.string())
+    .optional()
     .describe("Core technical skills required for this job"),
 
   experienceLevel: z
     .enum(["ENTRY", "MID", "SENIOR"])
+    .optional()
     .describe("0-2 years = ENTRY, 3-5 years = MID, 5+ years = SENIOR"),
 
   location: z
     .string()
+    .optional()
     .describe(
       "Extract the job location exactly as stated in the job description. " +
         "If the position is explicitly remote, return 'Remote'. " +
@@ -67,6 +71,7 @@ export const jobAnalysisSchema = z.object({
 
   salaryRange: z
     .string()
+    .optional()
     .describe(
       "Extract the salary or compensation range exactly as stated in the job description, " +
         "including the currency and relevant pay period when available. " +
@@ -77,6 +82,7 @@ export const jobAnalysisSchema = z.object({
 
   jobType: z
     .enum(["FULL_TIME", "PART_TIME", "CONTRACT", "INTERNSHIP"])
+    .optional()
     .describe(
       "Classify the employment type based strictly on the job description. " +
         "Use 'FULL_TIME' for full-time positions, 'PART_TIME' for part-time positions, " +
@@ -87,6 +93,7 @@ export const jobAnalysisSchema = z.object({
 
   summary: z
     .string()
+    .optional()
     .describe("Exactly 2 sentences explaining what the job is about"),
 });
 export type JobAnalysisResult = z.infer<typeof jobAnalysisSchema>;
@@ -114,10 +121,20 @@ export const chatRequestSchema = z
   })
   .passthrough();
 
-export const ToolCallSchema = z.object({
+export const ToolSchemaForJobStats = z.object({
   title: z.string().describe("search this title in the jobstats"),
   company: z.string().describe("search this company alos in jobstats"),
-  status: z
-    .enum(JobStatus)
-    .describe("The exact new status"),
+  status: z.enum(JobStatus).optional().describe("The exact new status"),
+});
+
+export const ToolSchemaForAddJob = z.object({
+  title: z.string().min(1, "Title cannot be empty").describe("The job role/position"),
+  company: z.string().min(1, "Company cannot be empty").describe("The company name"),
+  jobType: z.string().optional().describe("E.g., FULL_TIME, PART_TIME, REMOTE."),
+  experienceLevel: z.string().optional().describe("Experience required, e.g., '0-1 years'"),
+  location: z.string().optional().describe("Location e.g., UK, London, PAK"),
+  status: z.enum(JobStatus)
+  .optional()
+  .describe("Job status if user explicitly mentions it (e.g., 'got rejected', 'have an interview')."),
+  skills: z.string().optional().describe("Comma separated skills (e.g., react, mysql, typescript)")
 });
