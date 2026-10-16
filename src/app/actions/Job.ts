@@ -40,7 +40,7 @@ export async function deleteAll(): Promise<ActionResult<null>> {
     });
     if (count === 0) {
       return {
-        success: false ,
+        success: false,
         code: "VALIDATION_ERROR" as const,
         error: "No Jobs to Delete.",
       };
@@ -49,18 +49,18 @@ export async function deleteAll(): Promise<ActionResult<null>> {
       where: { userId },
     });
 
-    return { success: true , data: null };
+    return { success: true, data: null };
     revalidatePath("/dashboard");
   } catch (error) {
     if (error instanceof AppError) {
       return {
-        success: false ,
+        success: false,
         code: error.code,
         error: error.message,
       };
     }
     return {
-      success: false ,
+      success: false,
       code: "INTERNAL" as const,
       error: "Failed to delete jobs. Please try again.",
     };
@@ -94,22 +94,24 @@ export async function createJob(formData: unknown) {
       return DUPLICATE_ERROR;
     }
     const skillsArray = validation.data.skills
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean)
-      .filter(
-        (s, i, arr) =>
-          arr.findIndex((x) => x.toLowerCase() === s.toLowerCase()) === i,
-      );
+      ? validation.data.skills
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean)
+          .filter(
+            (s, i, arr) =>
+              arr.findIndex((x) => x.toLowerCase() === s.toLowerCase()) === i,
+          )
+      : [];
 
     await prisma.job.create({
       data: {
         title: validation.data.title,
         company: validation.data.company,
-        location: validation.data.location,
-        skills: skillsArray,
-        experienceLevel: validation.data.experienceLevel,
-        jobType: validation.data.jobType,
+        location: validation.data.location || "Not Specified",
+        skills: skillsArray || "Not Specified",
+        experienceLevel: validation.data.experienceLevel || "Not Specified",
+        jobType: validation.data.jobType || "Not Specified",
         summary: "Manually added. No AI summary.",
         salaryRange: "Not Disclosed",
         userId,
@@ -374,20 +376,20 @@ export async function saveJobToDatabase(jobData: JobAnalysisResult) {
         title: jobData.role,
         company: jobData.company,
         skills: jobData.skills,
-        experienceLevel: jobData.experienceLevel,
-        summary: jobData.summary,
-        location: jobData.location,
-        salaryRange: jobData.salaryRange,
-        jobType: jobData.jobType,
+        experienceLevel: jobData.experienceLevel || "Not Specified",
+        summary: jobData.summary || "Not Specified",
+        location: jobData.location || "Not Specified",
+        salaryRange: jobData.salaryRange || "Not Specified",
+        jobType: jobData.jobType || "Not Specified",
         userId,
       },
     });
-    return { success: true , job: newJob };
+    return { success: true, job: newJob };
   } catch (error) {
     console.error("Prisma Crash:", error);
     if (error instanceof AppError) {
       return {
-        success: false ,
+        success: false,
         code: error.code,
         error: error.message,
       };
@@ -402,7 +404,7 @@ export async function saveJobToDatabase(jobData: JobAnalysisResult) {
 
     console.error("Save Job Error:", error);
     return {
-      success: false ,
+      success: false,
       code: "INTERNAL" as const,
       error: "Failed to save job. Please try again.",
     };

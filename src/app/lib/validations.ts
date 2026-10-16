@@ -1,4 +1,4 @@
-import {  z } from "zod";
+import { z } from "zod";
 import { JobStatus } from "@prisma/client";
 
 export const createJobSchema = z.object({
@@ -21,7 +21,9 @@ export const createJobSchema = z.object({
 
   experienceLevel: z.enum(["ENTRY", "MID", "SENIOR"]).optional(),
 
-  jobType: z.enum(["PART_TIME", "FULL_TIME", "CONTRACT", "INTERNSHIP"]).optional(),
+  jobType: z
+    .enum(["PART_TIME", "FULL_TIME", "CONTRACT", "INTERNSHIP"])
+    .optional(),
 });
 
 export const jobIdSchema = z.string().uuid("Invalid Job ID format");
@@ -128,13 +130,46 @@ export const ToolSchemaForJobStats = z.object({
 });
 
 export const ToolSchemaForAddJob = z.object({
-  title: z.string().min(1, "Title cannot be empty").describe("The job role/position"),
-  company: z.string().min(1, "Company cannot be empty").describe("The company name"),
-  jobType: z.string().optional().describe("E.g., FULL_TIME, PART_TIME, REMOTE."),
-  experienceLevel: z.string().optional().describe("Experience required, e.g., '0-1 years'"),
+  title: z
+    .string()
+    .min(1, "Title cannot be empty")
+    .describe("The job role/position"),
+  company: z
+    .string()
+    .min(1, "Company cannot be empty")
+    .describe("The company name"),
+  jobType: z
+    .string()
+    .optional()
+    .describe("E.g., FULL_TIME, PART_TIME, REMOTE."),
+  experienceLevel: z
+    .string()
+    .optional()
+    .describe("Experience required, e.g., '0-1 years'"),
   location: z.string().optional().describe("Location e.g., UK, London, PAK"),
-  status: z.enum(JobStatus)
-  .optional()
-  .describe("Job status if user explicitly mentions it (e.g., 'got rejected', 'have an interview')."),
-  skills: z.string().optional().describe("Comma separated skills (e.g., react, mysql, typescript)")
+  status: z
+    .enum(JobStatus)
+    .optional()
+    .describe(
+      "Job status if user explicitly mentions it (e.g., 'got rejected', 'have an interview').",
+    ),
+  skills: z
+    .string()
+    .optional()
+    .describe("Comma separated skills (e.g., react, mysql, typescript)"),
 });
+
+export const ToolSchemaForDeleteJob = z.object({
+  title: z
+    .string()
+    .min(1, "Title cannot be empty")
+    .describe("The job role/position"),
+  company: z
+    .string()
+    .min(1, "Company cannot be empty")
+    .describe("The company name"),
+});
+export const ToolSchemaForDeleteAllJobs = z.object({
+confirmation: z.boolean()
+});
+
