@@ -2,8 +2,7 @@
 
 An AI-powered job tracker with a personal career coach. Built with Next.js, Prisma, and Groq.
 
-![Dashboard](./screenshots/dashboard.png)
-![AI Coach](./screenshots/coach.png)
+
 
 ---
 
@@ -50,27 +49,27 @@ An AI-powered job tracker with a personal career coach. Built with Next.js, Pris
 
 CareerSync includes an automated eval harness for the AI job extractor.
 
-**Why:** LLMs are non-deterministic. Prompt tweaks, model swaps, and
-temperature changes can silently break extraction. Evals catch this
+**Current score: 93.3%** (28/30 runs passed — 8 stable, 2 flaky, 0 errors)
+
+**Why:** LLMs are non-deterministic. Prompt tweaks, model swaps, and 
+temperature changes can silently break extraction. Evals catch this 
 before shipping.
 
 **How it works:**
 
-1. **Golden set** — 10 job descriptions, each with manually verified
+1. **Golden set** — 10 job descriptions, each with manually verified 
    expected JSON output
 2. **Runner** — extracts each JD via AI, compares output field-by-field
-3. **Normalization** — case, whitespace, plural, and alias tolerance
+3. **Normalization** — case, whitespace, plural, and alias tolerance 
    (e.g., "REST APIs" → "REST API", "GCP" → "Google Cloud Platform")
-4. **Flakiness detection** — runs each case 3 times, flags unstable
+4. **Flakiness detection** — runs each case 3 times, flags unstable 
    outputs
 5. **CI gate** — 80% pass rate + 0 flaky cases required
 
 **Run it:**
-
-```bash
 npm run eval
 
-## 🚀 Status
+##  Status
 
 **In development.** MVP shipping soon.
 
@@ -80,7 +79,8 @@ Follow progress on [LinkedIn](https://www.linkedin.com/in/ali-haider-17015734a/)
 
 ## 📸 Screenshots
 
-Coming soon.
+![Dashboard](./screenshots/dashboard.png)
+![AI Coach](./screenshots/coach.png)
 
 ---
 
