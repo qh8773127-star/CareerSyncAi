@@ -14,7 +14,6 @@ import {
   TOOL_DESC_DELETE_ALL_JOB,
 } from "./prompt";
 
-
 export const updateJobStatus = tool({
   description: TOOL_DESC_UPDATE_JOB,
 
@@ -86,7 +85,6 @@ export const addJobApplication = tool({
       });
       return {
         success: true,
-        jobId: addJob.id,
         message: `Success: Added new job ${title} at ${company} with status ${status}.`,
       };
     } catch (error) {
@@ -128,7 +126,7 @@ export const deleteSpecificJob = tool({
 });
 
 export const deleteAllJobs = tool({
-  description:TOOL_DESC_DELETE_ALL_JOB,
+  description: TOOL_DESC_DELETE_ALL_JOB,
   inputSchema: ToolSchemaForDeleteAllJobs,
   execute: async () => {
     try {
@@ -136,6 +134,13 @@ export const deleteAllJobs = tool({
       const DelAll = await prisma.job.deleteMany({
         where: { userId },
       });
+      if (DelAll.count === 0) {
+        return {
+          success: false,
+          message:
+            "Your tracker is already empty. You don't have any jobs to delete.",
+        };
+      }
       return {
         success: true,
         message: `Success: Cleared the tracker. Deleted ${DelAll.count} jobs from the database.`,
