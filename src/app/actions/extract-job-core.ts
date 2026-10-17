@@ -1,7 +1,7 @@
 import { generateText } from "ai";
 import { groq } from "@ai-sdk/groq";
 import { jobAnalysisSchema, type JobAnalysisResult } from "../lib/validations";
-import { DESCRIPTION_EXTRACTOR } from "../lib/prompt";
+import { DESCRIPTION_EXTRACTOR } from "../lib/ai/prompt";
 
 export async function extractJobData(
   cleanJobDescription: string,
