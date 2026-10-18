@@ -18,9 +18,57 @@ export default function CareerCoachPage() {
   const router = useRouter();
   const { messages, sendMessage, status } = useChat({
     transport: new DefaultChatTransport({ api: "/api/chat" }),
-    onFinish: () => {
+    onFinish: (event) => {
+      // STRICT FIX: Vercel AI SDK naye version mein direct message nahi deta, event object deta hai.
+      const message = event.message;
+
+      if (!message?.parts?.length) return;
+
+      const DATA_MUTATION_TOOLS = [
+        "addJobApplication",
+        "updateJobStatus",
+        "deleteJobApplication",
+        "deleteAllJobs",
+      ];
+
+      const executedMutation = message.parts.find((part) => {
+        if (!part.type.startsWith("tool-")) return false;
+
+        const toolName = part.type.slice("tool-".length);
+
+        return (
+          DATA_MUTATION_TOOLS.includes(toolName) &&
+          "state" in part &&
+          part.state === "output-available"
+        );
+      });
+
+      if (!executedMutation) {
+        return;
+      }
+
+      // Sirf aur sirf tab refresh hoga jab in 4 mein se koi tool successfully chalega
       router.refresh();
-      toast.success("Tracker updated!");
+
+      const toolName = executedMutation.type.slice("tool-".length);
+
+      switch (toolName) {
+        case "addJobApplication":
+          toast.success("Job added to your tracker.");
+          break;
+
+        case "updateJobStatus":
+          toast.success("Job status updated.");
+          break;
+
+        case "deleteJobApplication":
+          toast.success("Job application deleted.");
+          break;
+
+        case "deleteAllJobs":
+          toast.success("All jobs cleared.");
+          break;
+      }
     },
   });
 
