@@ -4,6 +4,8 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useRef, useEffect, useState } from "react";
 import { Markdown } from "./Markdown";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 const THINKING_MESSAGES = [
   "Thinking...",
@@ -13,8 +15,13 @@ const THINKING_MESSAGES = [
 ];
 
 export default function CareerCoachPage() {
+  const router = useRouter();
   const { messages, sendMessage, status } = useChat({
     transport: new DefaultChatTransport({ api: "/api/chat" }),
+    onFinish: () => {
+      router.refresh();
+      toast.success("Tracker updated!");
+    },
   });
 
   const [thinkingIndex, setThinkingIndex] = useState(0);
@@ -124,30 +131,30 @@ export default function CareerCoachPage() {
           disabled={isLoading}
           className="flex-1 p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-800 disabled:bg-slate-50"
         />
-          <button
-            type="submit"
-            disabled={isLoading || !input.trim()}
-            aria-label="Send message"
-            className="shrink-0 w-9 h-9 rounded-full bg-slate-900 text-white flex items-center justify-center hover:bg-slate-800 transition-colors disabled:opacity-30 disabled:cursor-not-allowed mb-0.5"
-          >
-            {isLoading ? (
-              <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            ) : (
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M5 12h14M13 6l6 6-6 6"
-                />
-              </svg>
-            )}
-          </button>
+        <button
+          type="submit"
+          disabled={isLoading || !input.trim()}
+          aria-label="Send message"
+          className="shrink-0 w-9 h-9 rounded-full bg-slate-900 text-white flex items-center justify-center hover:bg-slate-800 transition-colors disabled:opacity-30 disabled:cursor-not-allowed mb-0.5"
+        >
+          {isLoading ? (
+            <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          ) : (
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M5 12h14M13 6l6 6-6 6"
+              />
+            </svg>
+          )}
+        </button>
       </form>
     </div>
   );

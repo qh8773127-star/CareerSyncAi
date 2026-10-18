@@ -7,11 +7,10 @@ import { Toaster } from 'sonner';
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "CareerSync Dashboard", // Title bhi professional kar diya
-  description: "Track and manage your job applications like a pro.",
+  title: "CareerSync AI | Your Elite Job Tracker", // Title bhi professional kar diya
+  description: "AI-powered job application tracker and career coach.",
 };
 
-// LayoutProps ka kachra hata kar standard React typing lagayi hai
 export default function RootLayout({
   children,
 }: Readonly<{
