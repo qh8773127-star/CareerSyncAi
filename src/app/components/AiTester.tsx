@@ -93,7 +93,7 @@ export default function AiTester() {
       `Job Type: ${aiResponse.jobType}`,
       `Experience Level: ${aiResponse.experienceLevel}`,
       `Salary: ${aiResponse.salaryRange}`,
-      `Skills: ${aiResponse.skills.join(", ")}`,
+      `Skills: ${(aiResponse.skills || []).join(", ")}`,
       "",
       aiResponse.summary,
     ].join("\n");
@@ -157,23 +157,23 @@ export default function AiTester() {
 
           {/* Job metadata */}
           <div className="flex flex-wrap gap-2 border-b border-slate-100 bg-slate-50/50 px-6 py-4">
-            <MetaBadge label="Type" value={aiResponse.jobType} />
-            <MetaBadge label="Level" value={aiResponse.experienceLevel} />
-            <MetaBadge label="Location" value={aiResponse.location} />
+            <MetaBadge label="Type" value={aiResponse.jobType||"Not Specified"} />
+            <MetaBadge label="Level" value={aiResponse.experienceLevel||"Not Specified"} />
+            <MetaBadge label="Location" value={aiResponse.location||"Not Specified"} />
             {aiResponse.salaryRange && (
               <MetaBadge label="Salary" value={aiResponse.salaryRange} />
             )}
           </div>
 
           {/* Skills */}
-          {aiResponse.skills.length > 0 && (
+          {(aiResponse.skills||[]).length > 0 && (
             <div className="border-b border-slate-100 p-6">
               <h3 className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-400">
                 Required Skills
               </h3>
 
               <div className="flex flex-wrap gap-2">
-                {aiResponse.skills.map((skill, index) => (
+                {(aiResponse.skills||[]).map((skill, index) => (
                   <span
                     key={`${skill}-${index}`}
                     className="rounded-full border border-slate-200 bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700"

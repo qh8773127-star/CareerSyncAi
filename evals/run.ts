@@ -111,9 +111,9 @@ async function runCase(
       }
 
       // Skills comparison
-      if (!compareSkills(expected.skills, actual.skills)) {
+      if (!compareSkills(expected.skills||[], actual.skills||[])) {
         runFailed = true;
-        const { missing, extra } = diffSkills(expected.skills, actual.skills);
+        const { missing, extra } = diffSkills(expected.skills||[], actual.skills||[]);
         if (run === 0) {
           result.details.push(
             `  ❌ skills mismatch` +
