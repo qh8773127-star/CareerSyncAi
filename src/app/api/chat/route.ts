@@ -11,7 +11,6 @@ import { requireAuth } from "@/app/actions/Job";
 import { chatRequestSchema } from "@/app/lib/validations";
 import { AppError } from "@/app/lib/Error";
 import { redis } from "@/app/lib/redis";
-import { prisma } from "@/app/lib/prisma";
 import { getJobsContext } from "@/app/lib/ai/context";
 import {
   updateJobStatus,
