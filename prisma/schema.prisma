@@ -18,6 +18,43 @@ model User {
   jobs       Job[]
   createdAt  DateTime @default(now())
   updatedAt  DateTime  @updatedAt
+  apiLimit UserApiLimit?
+  quotaOperations QuotaOperation[]
+}
+
+model UserApiLimit{
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  chatCount       Int      @default(0)
+  extractionCount Int      @default(0)
+  lastReset       DateTime @default(now())
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum QuotaType {
+  CHAT
+  EXTRACTION
+}
+
+enum QuotaOperationStatus {
+  CONSUMED
+  REFUNDED
+  REJECTED
+}
+
+model QuotaOperation {
+  id        String   @id @default(uuid())
+  userId    String
+  requestId String
+  type      QuotaType
+  status    QuotaOperationStatus @default(CONSUMED)
+  dayStart  DateTime
+  createdAt DateTime             @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, requestId]) // prevent double-billing
+  @@index([userId, dayStart, type])
 }
 
 enum JobStatus {
@@ -89,3 +126,4 @@ model VerificationToken {
  
   @@id([identifier, token])
 }
+
