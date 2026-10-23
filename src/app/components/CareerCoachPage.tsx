@@ -18,8 +18,18 @@ export default function CareerCoachPage() {
   const router = useRouter();
   const { messages, sendMessage, status } = useChat({
     transport: new DefaultChatTransport({ api: "/api/chat" }),
+
+    onError: (error) => {
+      if (
+        error.message.includes("403") ||
+        error.message.toLowerCase().includes("limit")
+      ) {
+        toast.error("Daily chat limit reached. Upgrade to Pro.");
+      } else {
+        toast.error("Something went wrong. Please try again.");
+      }
+    },
     onFinish: (event) => {
-      // STRICT FIX: Vercel AI SDK naye version mein direct message nahi deta, event object deta hai.
       const message = event.message;
 
       if (!message?.parts?.length) return;

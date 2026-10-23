@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";
 import { requireAuth } from "../actions/Job";
 
 export const MAX_EXTRACTIONS = 3;
-export const MAX_CHATS = 2;
+export const MAX_CHATS = 20;
 
 export async function consumeQuota(type: "CHAT" | "EXTRACTION",requestId: string,) {
   const userId = await requireAuth();
