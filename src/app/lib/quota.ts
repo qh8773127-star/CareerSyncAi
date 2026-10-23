@@ -1,11 +1,31 @@
+"use server";
+
 import { prisma } from "./prisma";
 import { Prisma } from "@prisma/client";
 import { requireAuth } from "../actions/Job";
+import { MAX_EXTRACTIONS,MAX_CHATS } from "./constraints";
+const getResetUserLimit = (
+  userLimit: {
+    lastReset: Date | string;
+    chatCount: number;
+    extractionCount: number;
+  },
+  now: Date,
+) => {
+  const lastReset = new Date(userLimit.lastReset);
+  const isNewDay = now.toDateString() !== lastReset.toDateString();
 
-export const MAX_EXTRACTIONS = 3;
-export const MAX_CHATS = 20;
+  return {
+    isNewDay,
+    chatCount: isNewDay ? 0 : userLimit.chatCount,
+    extractionCount: isNewDay ? 0 : userLimit.extractionCount,
+  };
+};
 
-export async function consumeQuota(type: "CHAT" | "EXTRACTION",requestId: string,) {
+export async function consumeQuota(
+  type: "CHAT" | "EXTRACTION",
+  requestId: string,
+) {
   const userId = await requireAuth();
   const limit = type === "CHAT" ? MAX_CHATS : MAX_EXTRACTIONS;
 
@@ -31,24 +51,20 @@ export async function consumeQuota(type: "CHAT" | "EXTRACTION",requestId: string
             lastReset: now,
           },
         });
-      } else {
-        const lastReset = new Date(userLimit.lastReset);
-        const isNewDay = now.toDateString() !== lastReset.toDateString();
+      }
+      const { isNewDay, chatCount, extractionCount } = getResetUserLimit(
+        userLimit,
+        now,
+      );
 
-        if (isNewDay) {
-          userLimit = await tx.userApiLimit.update({
-            where: { userId },
-            data: {
-              chatCount: 0,
-              extractionCount: 0,
-              lastReset: now,
-            },
-          });
-        }
+      if (isNewDay) {
+        userLimit = await tx.userApiLimit.update({
+          where: { userId },
+          data: { chatCount: 0, extractionCount: 0, lastReset: now },
+        });
       }
 
-      const currentCount =
-        type === "CHAT" ? userLimit.chatCount : userLimit.extractionCount;
+      const currentCount = type === "CHAT" ? chatCount : extractionCount;
 
       if (currentCount >= limit) {
         return {
@@ -70,12 +86,9 @@ export async function consumeQuota(type: "CHAT" | "EXTRACTION",requestId: string
       await tx.userApiLimit.update({
         where: { userId },
         data: {
-          chatCount:
-            type === "CHAT" ? userLimit.chatCount + 1 : userLimit.chatCount,
+          chatCount: type === "CHAT" ? chatCount + 1 : chatCount,
           extractionCount:
-            type === "EXTRACTION"
-              ? userLimit.extractionCount + 1
-              : userLimit.extractionCount,
+            type === "EXTRACTION" ? extractionCount + 1 : extractionCount,
         },
       });
 
@@ -94,6 +107,7 @@ export async function consumeQuota(type: "CHAT" | "EXTRACTION",requestId: string
     throw error;
   }
 }
+
 export async function refundQuota(requestId: string) {
   const userId = await requireAuth();
 
@@ -137,4 +151,43 @@ export async function refundQuota(requestId: string) {
       message: "Quota successfully refunded due to AI failure.",
     };
   });
-} 
+}
+
+export const getApiLimitCount = async (type: "CHAT" | "EXTRACTION") => {
+  try {
+    const userId = await requireAuth();
+
+    const userLimit = await prisma.userApiLimit.findUnique({
+      where: { userId },
+    });
+
+    if (!userLimit) return 0;
+
+    const now = new Date();
+    const { isNewDay, chatCount, extractionCount } = getResetUserLimit(
+      userLimit,
+      now,
+    );
+    if (isNewDay) {
+      await prisma.userApiLimit.updateMany({
+        where: {
+          userId,
+          lastReset: {
+            lt: new Date(now.getFullYear(), now.getMonth(), now.getDate()),
+          },
+        },
+        data: {
+          chatCount: 0,
+          extractionCount: 0,
+          lastReset: now,
+        },
+      });
+      return 0;
+    }
+
+    return type === "CHAT" ? chatCount : extractionCount;
+  } catch (error) {
+    console.error("Quota Fetch Error:", error);
+    return -1;
+  }
+};
