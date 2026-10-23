@@ -1,11 +1,11 @@
 import CareerCoachPage from "@/app/components/CareerCoachPage";
 
-const page = () => {
+const CoachPage = () => {
   return (
-    <section>
-        <CareerCoachPage/>
-    </section>
-  )
-}
+    <div >
+        <CareerCoachPage />
+    </div>
+  );
+};
 
-export default page
+export default CoachPage;
