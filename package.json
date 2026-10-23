@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "postinstall": "prisma skills sync || exit 0",
+    "postinstall": "prisma generate || exit 0",
     "eval": "tsx evals/run.ts"
   },
   "dependencies": {
