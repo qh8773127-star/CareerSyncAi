@@ -53,7 +53,7 @@ model QuotaOperation {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, requestId]) // prevent double-billing
+  @@unique([userId, requestId]) 
   @@index([userId, dayStart, type])
 }
 
@@ -69,7 +69,6 @@ model Job {
   title           String   
   company         String   
   
-  // AI Fields
   skills          String[]
   experienceLevel String?   
   summary         String?
@@ -86,7 +85,7 @@ model Job {
   
   @@index([userId])
 
-  @@unique([userId, title, company]) //prevent race condition
+  @@unique([userId, title, company]) 
 }
 
 model Account {

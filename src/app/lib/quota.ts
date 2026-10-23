@@ -3,12 +3,9 @@ import { Prisma } from "@prisma/client";
 import { requireAuth } from "../actions/Job";
 
 export const MAX_EXTRACTIONS = 3;
-export const MAX_CHATS = 15;
+export const MAX_CHATS = 2;
 
-export async function consumeQuota(
-  type: "CHAT" | "EXTRACTION",
-  requestId: string,
-) {
+export async function consumeQuota(type: "CHAT" | "EXTRACTION",requestId: string,) {
   const userId = await requireAuth();
   const limit = type === "CHAT" ? MAX_CHATS : MAX_EXTRACTIONS;
 
