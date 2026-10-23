@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { analyzeJobDescription } from "../actions/ai-actions";
 import { saveJobToDatabase } from "../actions/Job";
 import { jobAnalysisSchema, type JobAnalysisResult } from "../lib/validations";
+import { getApiLimitCount } from "../lib/quota";
+import { MAX_EXTRACTIONS } from "../lib/constraints";
 
 function MetaBadge({ label, value }: { label: string; value: string }) {
   return (
@@ -24,9 +26,29 @@ export default function AiTester() {
   const [aiResponse, setAiResponse] = useState<JobAnalysisResult | null>(null);
   const [isPending, startTransition] = useTransition();
 
+  const [usageCount, setUsageCount] = useState(0);
+  const maxLimit = MAX_EXTRACTIONS;
+
   const router = useRouter();
 
+  useEffect(() => {
+    const fetchUsage = async () => {
+      try {
+        const count = await getApiLimitCount("EXTRACTION");
+        setUsageCount(count);
+      } catch (err) {
+        console.error("Failed to fetch quota:", err);
+      }
+    };
+    fetchUsage();
+  }, []);
+
   const handleFireAI = () => {
+    if (jobInput.trim().length < 20) {
+      toast.error("Job description is too short.");
+      return;
+    }
+
     startTransition(async () => {
       setAiResponse(null);
 
@@ -48,6 +70,7 @@ export default function AiTester() {
         }
 
         setAiResponse(validation.data);
+        setUsageCount((prev) => prev + 1);
         toast.success("Job details extracted successfully.");
       } catch (error) {
         console.error("Job analysis error:", error);
@@ -108,36 +131,68 @@ export default function AiTester() {
   };
 
   return (
-    <div className="mt-6 rounded-md border border-slate-200 p-4">
-      <label
-        htmlFor="job-description"
-        className="mb-2 block text-sm font-semibold text-slate-700"
-      >
-        Job Description
-      </label>
+    <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    
+      <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <label
+            htmlFor="job-description"
+            className="block text-base font-bold text-slate-800"
+          >
+            AI Job Extractor
+          </label>
+          <p className="text-sm text-slate-500 mt-1">
+            Paste a raw job description to extract structured details.
+          </p>
+        </div>
+
+        <div className="flex flex-col items-start sm:items-end">
+          <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
+            Daily Limit
+          </span>
+          <span
+            className={`text-sm font-semibold px-2.5 py-1 rounded-md mt-1 ${
+              usageCount >= maxLimit
+                ? "bg-red-50 text-red-600"
+                : "bg-blue-50 text-blue-600"
+            }`}
+          >
+            {usageCount} / {maxLimit} Used
+          </span>
+        </div>
+      </div>
 
       <textarea
         id="job-description"
-        className="mb-4 w-full rounded-md border border-slate-300 p-3 text-black outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-100"
+        className="mb-4 w-full rounded-xl border border-slate-300 p-4 text-slate-800 outline-none transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-100 disabled:bg-slate-50 disabled:cursor-not-allowed"
         rows={6}
-        placeholder="Paste the complete job description here..."
+        placeholder={
+          usageCount >= maxLimit
+            ? "Daily extraction limit reached. Upgrade to Pro."
+            : "Paste the complete job description here..."
+        }
         value={jobInput}
         onChange={(event) => setJobInput(event.target.value)}
-        disabled={isPending}
+        disabled={isPending || usageCount >= maxLimit} 
       />
 
       <button
         type="button"
         onClick={handleFireAI}
-        disabled={isPending || jobInput.trim().length < 20}
-        className="cursor-pointer rounded-md bg-slate-900 px-4 py-2 font-medium text-white transition-colors hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
+        disabled={
+          isPending || jobInput.trim().length < 20 || usageCount >= maxLimit
+        }
+        className="flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-6 py-3 font-semibold text-white transition-all hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400 w-full sm:w-auto"
       >
-        {isPending ? "Processing..." : "Extract Job Details"}
+        {isPending && (
+          <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+        )}
+        {isPending ? "Extracting..." : "Extract Job Details"}
       </button>
 
       {aiResponse && (
-        <div className="mt-8 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-          {/* Header */}
+        <div className="mt-8 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm animate-in fade-in slide-in-from-bottom-4">
+
           <div className="border-b border-slate-100 p-6">
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0 flex-1">
@@ -154,26 +209,31 @@ export default function AiTester() {
               </span>
             </div>
           </div>
-
-          {/* Job metadata */}
           <div className="flex flex-wrap gap-2 border-b border-slate-100 bg-slate-50/50 px-6 py-4">
-            <MetaBadge label="Type" value={aiResponse.jobType||"Not Specified"} />
-            <MetaBadge label="Level" value={aiResponse.experienceLevel||"Not Specified"} />
-            <MetaBadge label="Location" value={aiResponse.location||"Not Specified"} />
+            <MetaBadge
+              label="Type"
+              value={aiResponse.jobType || "Not Specified"}
+            />
+            <MetaBadge
+              label="Level"
+              value={aiResponse.experienceLevel || "Not Specified"}
+            />
+            <MetaBadge
+              label="Location"
+              value={aiResponse.location || "Not Specified"}
+            />
             {aiResponse.salaryRange && (
               <MetaBadge label="Salary" value={aiResponse.salaryRange} />
             )}
           </div>
-
-          {/* Skills */}
-          {(aiResponse.skills||[]).length > 0 && (
+          {(aiResponse.skills || []).length > 0 && (
             <div className="border-b border-slate-100 p-6">
               <h3 className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-400">
                 Required Skills
               </h3>
 
               <div className="flex flex-wrap gap-2">
-                {(aiResponse.skills||[]).map((skill, index) => (
+                {(aiResponse.skills || []).map((skill, index) => (
                   <span
                     key={`${skill}-${index}`}
                     className="rounded-full border border-slate-200 bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700"
@@ -185,7 +245,6 @@ export default function AiTester() {
             </div>
           )}
 
-          {/* Summary */}
           <div className="border-b border-slate-100 p-6">
             <h3 className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-400">
               AI Summary
@@ -195,7 +254,6 @@ export default function AiTester() {
             </p>
           </div>
 
-          {/* Actions */}
           <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-50 p-4">
             <div className="flex items-center gap-2">
               <button
