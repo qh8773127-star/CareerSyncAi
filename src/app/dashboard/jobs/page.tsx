@@ -1,7 +1,6 @@
 import { auth } from "@/app/auth";
 import { redirect } from "next/navigation";
 import AddJobForm from "@/app/components/AddJobForm";
-import SignOut from "@/app/components/SignOut";
 import JobActionButtons from "@/app/components/JobActionButtons";
 import { getJobStats } from "@/app/actions/Job";
 import DashboardStats from "@/app/components/DashboardStats";
@@ -34,9 +33,7 @@ export default async function DashboardPage({
 
   return (
     <div className="min-h-screen p-6 md:p-10 max-w-5xl mx-auto space-y-10">
-      {/* <header className="flex justify-between items-center border-b top-0 z-50 bg-slate-50/80 backdrop-blur-md border-slate-200 py-4 mb-4">
-        <SignOut />
-      </header> */}
+   
 
       <section>
         <DashboardStats stats={statsJob} />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useEffect } from "react";
+import { useState, useTransition, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
@@ -25,90 +25,86 @@ export default function AiTester() {
   const [jobInput, setJobInput] = useState("");
   const [aiResponse, setAiResponse] = useState<JobAnalysisResult | null>(null);
   const [isPending, startTransition] = useTransition();
-
-  const [usageCount, setUsageCount] = useState(0);
+  const [usageCount, setUsageCount] = useState<number | null>(null);
   const maxLimit = MAX_EXTRACTIONS;
-
   const router = useRouter();
 
   useEffect(() => {
+    let isMounted = true;
     const fetchUsage = async () => {
       try {
         const count = await getApiLimitCount("EXTRACTION");
-        setUsageCount(count);
-      } catch (err) {
-        console.error("Failed to fetch quota:", err);
+        if (isMounted) setUsageCount(count);
+      } catch (error) {
+        console.error("Quota fetch failed", error);
+        if (isMounted) setUsageCount(0);
       }
     };
     fetchUsage();
+    return () => { isMounted = false; };
   }, []);
 
-  const handleFireAI = () => {
+  const handleFireAI = useCallback(() => {
     if (jobInput.trim().length < 20) {
       toast.error("Job description is too short.");
+      return;
+    }
+    if (usageCount === null || usageCount >= maxLimit) {
+      toast.error("Daily extraction limit reached. Upgrade to Pro.");
       return;
     }
 
     startTransition(async () => {
       setAiResponse(null);
-
       try {
         const result = await analyzeJobDescription(jobInput);
-
         if (!result.success || !result.data) {
-          console.error("Job analysis failed:", result.error);
-          toast.error(result.error || "Unable to analyze the job description.");
+          toast.error(result.error || "Unable to analyze.");
           return;
         }
 
         const validation = jobAnalysisSchema.safeParse(result.data);
-
         if (!validation.success) {
-          console.error("Invalid AI response:", validation.error.flatten());
-          toast.error("The AI returned invalid job details.");
+          toast.error("AI returned invalid data format.");
           return;
         }
 
         setAiResponse(validation.data);
-        setUsageCount((prev) => prev + 1);
+
+        setUsageCount((prev) => (prev !== null ? prev + 1 : 1));
         toast.success("Job details extracted successfully.");
       } catch (error) {
-        console.error("Job analysis error:", error);
-        toast.error("Unable to analyze the job description. Please try again.");
+        console.error(`An unexpected error occurred ${error}`);
+        toast.error("An unexpected error occurred.");
       }
     });
-  };
+  }, [jobInput, usageCount, maxLimit]);
 
-  const handleSaveJob = () => {
+  const handleSaveJob = useCallback(() => {
     if (!aiResponse) {
       toast.error("No job details available to save.");
       return;
     }
-
     startTransition(async () => {
       try {
         const result = await saveJobToDatabase(aiResponse);
-
         if (!result.success) {
-          console.error("Save job failed:", result.error);
-          toast.error("Unable to save job details. Please try again later.");
+          toast.error("Unable to save job details.");
           return;
         }
-
         toast.success("Job details saved successfully.");
         setAiResponse(null);
         setJobInput("");
         router.refresh();
       } catch (error) {
-        console.error("Save job error:", error);
-        toast.error("An unexpected error occurred. Please try again later.");
+        console.error(`An unexpected error occurred ${error}`);
+        toast.error("An unexpected error occurred.");
       }
     });
-  };
+  }, [aiResponse, router]);
 
-  const handleCopy = async () => {
+  const handleCopy = useCallback(async () => {
     if (!aiResponse) return;
-
     const text = [
       aiResponse.role,
       `Company: ${aiResponse.company}`,
@@ -120,19 +116,19 @@ export default function AiTester() {
       "",
       aiResponse.summary,
     ].join("\n");
-
     try {
       await navigator.clipboard.writeText(text);
       toast.success("Job details copied to clipboard.");
     } catch (error) {
-      console.error("Clipboard error:", error);
+      console.error(`Unable to copy details ${error}`);
       toast.error("Unable to copy details.");
     }
-  };
+  }, [aiResponse]);
+
+  const isLimitReached = usageCount !== null && usageCount >= maxLimit;
 
   return (
     <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-    
       <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <label
@@ -150,15 +146,19 @@ export default function AiTester() {
           <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
             Daily Limit
           </span>
-          <span
-            className={`text-sm font-semibold px-2.5 py-1 rounded-md mt-1 ${
-              usageCount >= maxLimit
-                ? "bg-red-50 text-red-600"
-                : "bg-blue-50 text-blue-600"
-            }`}
-          >
-            {usageCount} / {maxLimit} Used
-          </span>
+          {usageCount === null ? (
+            <div className="h-7 w-24 bg-slate-200 animate-pulse rounded-md mt-1"></div>
+          ) : (
+            <span
+              className={`text-sm font-semibold px-2.5 py-1 rounded-md mt-1 transition-colors ${
+                isLimitReached
+                  ? "bg-red-50 text-red-600 border border-red-100"
+                  : "bg-blue-50 text-blue-600 border border-blue-100"
+              }`}
+            >
+              {usageCount} / {maxLimit} Used
+            </span>
+          )}
         </div>
       </div>
 
@@ -167,20 +167,22 @@ export default function AiTester() {
         className="mb-4 w-full rounded-xl border border-slate-300 p-4 text-slate-800 outline-none transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-100 disabled:bg-slate-50 disabled:cursor-not-allowed"
         rows={6}
         placeholder={
-          usageCount >= maxLimit
+          isLimitReached
             ? "Daily extraction limit reached. Upgrade to Pro."
             : "Paste the complete job description here..."
         }
         value={jobInput}
         onChange={(event) => setJobInput(event.target.value)}
-        disabled={isPending || usageCount >= maxLimit} 
+        disabled={isPending || isLimitReached || usageCount === null}
       />
-
       <button
         type="button"
         onClick={handleFireAI}
         disabled={
-          isPending || jobInput.trim().length < 20 || usageCount >= maxLimit
+          isPending ||
+          jobInput.trim().length < 20 ||
+          isLimitReached ||
+          usageCount === null
         }
         className="flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-6 py-3 font-semibold text-white transition-all hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400 w-full sm:w-auto"
       >
@@ -189,10 +191,8 @@ export default function AiTester() {
         )}
         {isPending ? "Extracting..." : "Extract Job Details"}
       </button>
-
       {aiResponse && (
         <div className="mt-8 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm animate-in fade-in slide-in-from-bottom-4">
-
           <div className="border-b border-slate-100 p-6">
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0 flex-1">
@@ -203,12 +203,12 @@ export default function AiTester() {
                   {aiResponse.company}
                 </p>
               </div>
-
               <span className="shrink-0 rounded-full border border-violet-200 bg-violet-50 px-2.5 py-1 text-xs font-semibold text-violet-700">
                 AI Extracted
               </span>
             </div>
           </div>
+
           <div className="flex flex-wrap gap-2 border-b border-slate-100 bg-slate-50/50 px-6 py-4">
             <MetaBadge
               label="Type"
@@ -226,12 +226,12 @@ export default function AiTester() {
               <MetaBadge label="Salary" value={aiResponse.salaryRange} />
             )}
           </div>
+
           {(aiResponse.skills || []).length > 0 && (
             <div className="border-b border-slate-100 p-6">
               <h3 className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-400">
                 Required Skills
               </h3>
-
               <div className="flex flex-wrap gap-2">
                 {(aiResponse.skills || []).map((skill, index) => (
                   <span
