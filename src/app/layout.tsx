@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+export const dynamic = 'force-dynamic';
 import { Toaster } from 'sonner';
-
-// Strictly sirf professional font load kar rahe hain
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "CareerSync AI | Your Elite Job Tracker", // Title bhi professional kar diya
+  title: "CareerSync AI | Your Elite Job Tracker", 
   description: "AI-powered job application tracker and career coach.",
 };
 
