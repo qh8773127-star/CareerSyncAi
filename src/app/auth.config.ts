@@ -13,15 +13,27 @@ export default {
       clientSecret: process.env.AUTH_GOOGLE_SECRET!,
     }),
   ],
-  pages: { signIn: "/" },
+  pages: {
+    signIn: "/",
+  },
   cookies: {
     pkceCodeVerifier: {
       name: "authjs.pkce.code_verifier",
-      options: { httpOnly: true, sameSite: "none", path: "/", secure: true },
+      options: {
+        httpOnly: true,
+        sameSite: "none", 
+        path: "/",
+        secure: true, 
+      },
     },
     sessionToken: {
       name: "authjs.session-token",
-      options: { httpOnly: true, sameSite: "none", path: "/", secure: true },
+      options: {
+        httpOnly: true,
+        sameSite: "none", 
+        path: "/",
+        secure: true, 
+      },
     },
   },
 } satisfies NextAuthConfig;
