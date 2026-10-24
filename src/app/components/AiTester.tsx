@@ -47,7 +47,6 @@ export default function AiTester() {
   const maxLimit = MAX_EXTRACTIONS;
   const router = useRouter();
 
-  // Database se actual quota count load karo.
   const refreshUsage = useCallback(async () => {
     try {
       const count = await getApiLimitCount("EXTRACTION");
@@ -100,7 +99,6 @@ export default function AiTester() {
       return;
     }
 
-    // Error ya loading ki state mein AI request mat bhejo.
     if (quotaError || usageCount === null) {
       toast.error("Unable to verify your daily quota. Please try again.");
       return;
@@ -119,9 +117,6 @@ export default function AiTester() {
 
         if (!result.success || !result.data) {
           toast.error(result.error || "Unable to analyze.");
-
-          // Server ne quota refund kiya ho sakta hai;
-          // database se latest count load karo.
           await refreshUsage();
           return;
         }
@@ -136,8 +131,6 @@ export default function AiTester() {
 
         setAiResponse(validation.data);
 
-        // Local count ko manually +1 karne ke bajaye
-        // server/database ka actual count dobara load karo.
         await refreshUsage();
 
         toast.success("Job details extracted successfully.");
