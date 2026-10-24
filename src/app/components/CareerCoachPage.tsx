@@ -80,7 +80,6 @@ export default function CareerCoachPage() {
       return;
     }
 
-    // Optimistic Update
     setUsageCount((prev) => (prev !== null ? prev + 1 : 1));
     setThinkingIndex(0);
     lastErrorRef.current = null;
@@ -134,7 +133,6 @@ export default function CareerCoachPage() {
         </div>
       </div>
 
-      {/* Chat Area */}
       <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-slate-50/50">
         {messages.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center px-4">
@@ -219,7 +217,6 @@ export default function CareerCoachPage() {
         )}
       </div>
 
-      {/* Input Area */}
       <div className="p-4 bg-white border-t border-slate-100">
         <form
           onSubmit={(e) => {

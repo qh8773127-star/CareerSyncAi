@@ -5,7 +5,6 @@ import { Ratelimit } from "@upstash/ratelimit";
 import { redis } from "../lib/redis";
 import { extractJobData } from "./extract-job-core";
 import { consumeQuota, refundQuota } from "../lib/quota";
-import { v4 as uuidv4 } from "uuid";
 
 function sanitizeJobDescription(text: string) {
   return text.trim().replace(/\s+/g, " ").substring(0, 5000);
@@ -18,7 +17,7 @@ const ratelimit = new Ratelimit({
 
 export async function analyzeJobDescription(rawJobText: string) {
   const userId = await requireAuth();
-  const requestId = uuidv4();
+  const requestId = crypto.randomUUID();
   try {
     const { success } = await ratelimit.limit(userId);
 
