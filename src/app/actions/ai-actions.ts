@@ -4,6 +4,8 @@ import { requireAuth } from "./Job";
 import { Ratelimit } from "@upstash/ratelimit";
 import { redis } from "../lib/redis";
 import { extractJobData } from "./extract-job-core";
+import { consumeQuota, refundQuota } from "../lib/quota";
+import { v4 as uuidv4 } from "uuid";
 
 function sanitizeJobDescription(text: string) {
   return text.trim().replace(/\s+/g, " ").substring(0, 5000);
@@ -14,11 +16,10 @@ const ratelimit = new Ratelimit({
   limiter: Ratelimit.slidingWindow(5, "1 m"),
 });
 
-
-
 export async function analyzeJobDescription(rawJobText: string) {
+  const userId = await requireAuth();
+  const requestId = uuidv4();
   try {
-    const userId = await requireAuth();
     const { success } = await ratelimit.limit(userId);
 
     if (!success) {
@@ -34,6 +35,13 @@ export async function analyzeJobDescription(rawJobText: string) {
         error: "Job description is too short.",
       };
     }
+    const quota = await consumeQuota("EXTRACTION", requestId);
+    if (!quota.success) {
+      return {
+        success: false,
+        error: "Daily extraction limit reached.",
+      };
+    }
 
     const cleanJobDescription = sanitizeJobDescription(rawJobText);
     const object = await extractJobData(cleanJobDescription);
@@ -44,6 +52,13 @@ export async function analyzeJobDescription(rawJobText: string) {
     };
   } catch (error) {
     console.error("Structured Output Engine Failed:", error);
+    try {
+      await refundQuota(requestId);
+       console.log("REFUND EXECUTED");
+    } catch (refundError) {
+      console.error("Refund Failed:", refundError);
+      console.error("Refund Failed:", refundError);
+    }
 
     return {
       success: false,

@@ -7,88 +7,126 @@ import { MAX_EXTRACTIONS, MAX_CHATS } from "./constraints";
 
 type QuotaType = "CHAT" | "EXTRACTION";
 
-const getResetUserLimit = (
-  userLimit: { lastReset: Date | string; chatCount: number; extractionCount: number },
-  now: Date,
-) => {
-  const lastReset = new Date(userLimit.lastReset);
-  const isNewDay = now.toDateString() !== lastReset.toDateString();
-
-  return {
-    isNewDay,
-    chatCount: isNewDay ? 0 : userLimit.chatCount,
-    extractionCount: isNewDay ? 0 : userLimit.extractionCount,
-  };
+type UserLimit = {
+  lastReset: Date;
+  chatCount: number;
+  extractionCount: number;
 };
 
-export async function consumeQuota(
-  type: QuotaType,
-  requestId: string,
-) {
+function isNewCalendarDay(lastReset: Date, now: Date): boolean {
+  return lastReset.toDateString() !== now.toDateString();
+}
+
+function getCount(userLimit: UserLimit, type: QuotaType): number {
+  return type === "CHAT" ? userLimit.chatCount : userLimit.extractionCount;
+}
+
+function getMaxLimit(type: QuotaType): number {
+  return type === "CHAT" ? MAX_CHATS : MAX_EXTRACTIONS;
+}
+
+function getCountField(type: QuotaType): "chatCount" | "extractionCount" {
+  return type === "CHAT" ? "chatCount" : "extractionCount";
+}
+
+export async function consumeQuota(type: QuotaType, requestId: string) {
   try {
     const userId = await requireAuth();
-    const limit = type === "CHAT" ? MAX_CHATS : MAX_EXTRACTIONS;
 
-    return await prisma.$transaction(async (tx) => {
 
-      const userExists = await tx.user.findUnique({ where: { id: userId } });
-      if (!userExists) {
-        return { success: false, message: "Session expired. Please log in again." };
-      }
+    if (!requestId?.trim()) {
+      return { success: false as const, error: "Invalid request ID." };
+    }
 
-      let userLimit = await tx.userApiLimit.findUnique({ where: { userId } });
-      const now = new Date();
-      const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const now = new Date();
+    const dayStart = new Date(now);
+    dayStart.setHours(0, 0, 0, 0);
 
-      if (!userLimit) {
-        userLimit = await tx.userApiLimit.create({
-          data: { userId, chatCount: 0, extractionCount: 0, lastReset: now },
-        });
-      }
+    return await prisma.$transaction(
+      async (tx) => {
 
-      const { isNewDay, chatCount, extractionCount } = getResetUserLimit(userLimit, now);
-
-      if (isNewDay) {
-        userLimit = await tx.userApiLimit.update({
+        await tx.userApiLimit.upsert({
           where: { userId },
-          data: { chatCount: 0, extractionCount: 0, lastReset: now },
+          create: { userId, chatCount: 0, extractionCount: 0, lastReset: now },
+          update: {},
         });
-      }
 
-      const currentCount = type === "CHAT" ? chatCount : extractionCount;
+        const userLimit = await tx.userApiLimit.findUnique({
+          where: { userId },
+        });
 
-      if (currentCount >= limit) {
+        if (!userLimit) {
+          throw new Error("Unable to load user quota.");
+        }
+
+        let currentChatCount = userLimit.chatCount;
+        let currentExtractionCount = userLimit.extractionCount;
+
+        if (isNewCalendarDay(userLimit.lastReset, now)) {
+          currentChatCount = 0;
+          currentExtractionCount = 0;
+
+          await tx.userApiLimit.update({
+            where: { userId },
+            data: { chatCount: 0, extractionCount: 0, lastReset: now },
+          });
+        }
+
+        const currentCount =
+          type === "CHAT" ? currentChatCount : currentExtractionCount;
+        const maxLimit = getMaxLimit(type);
+
+        if (currentCount >= maxLimit) {
+          return {
+            success: false as const,
+            error: "Daily limit reached.",
+            remaining: 0,
+          };
+        }
+
+        await tx.quotaOperation.create({
+          data: { userId, requestId, type, status: "CONSUMED", dayStart },
+        });
+
+        const updatedLimit = await tx.userApiLimit.update({
+          where: { userId },
+          data:
+            type === "CHAT"
+              ? { chatCount: { increment: 1 } }
+              : { extractionCount: { increment: 1 } },
+        });
+
         return {
-          success: false,
-          message: `Daily ${type.toLowerCase()} limit reached. Upgrade to Pro.`,
+          success: true as const,
+          remaining: Math.max(0, maxLimit - getCount(updatedLimit, type)),
+          used: getCount(updatedLimit, type),
+          limit: maxLimit,
         };
-      }
-      await tx.quotaOperation.create({
-        data: { userId, requestId, type, status: "CONSUMED", dayStart },
-      });
-
-      await tx.userApiLimit.update({
-        where: { userId },
-        data: {
-          chatCount: type === "CHAT" ? chatCount + 1 : chatCount,
-          extractionCount: type === "EXTRACTION" ? extractionCount + 1 : extractionCount,
-        },
-      });
-
-      return { success: true, remaining: limit - (currentCount + 1) };
-    });
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      console.error("[CONSUME_QUOTA_ERROR]:", error.message);
-    } else {
-      console.error("[CONSUME_QUOTA_ERROR]: Unknown error occurred");
+      },
+      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+    );
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      return { success: false as const, error: "Duplicate request blocked." };
     }
-    
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
-      return { success: false, message: "Duplicate request blocked." };
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2034"
+    ) {
+      return {
+        success: false as const,
+        error: "Transaction conflict. Please try again.",
+      };
     }
-    
-    return { success: false, message: "Database error. Please try again later." };
+
+    console.error("[CONSUME_QUOTA_ERROR]:", error);
+    return {
+      success: false as const,
+      error: "Unable to verify or consume quota.",
+    };
   }
 }
 
@@ -96,59 +134,85 @@ export async function refundQuota(requestId: string) {
   try {
     const userId = await requireAuth();
 
+    if (!requestId?.trim()) {
+      return { success: false as const };
+    }
+
     return await prisma.$transaction(async (tx) => {
       const operation = await tx.quotaOperation.findUnique({
         where: { userId_requestId: { userId, requestId } },
       });
 
       if (!operation || operation.status !== "CONSUMED") {
-        return { success: false, message: "Operation not found or already refunded." };
+        return { success: false as const };
       }
 
-      await tx.quotaOperation.update({
-        where: { id: operation.id },
+      const refundResult = await tx.quotaOperation.updateMany({
+        where: { userId, requestId, status: "CONSUMED" },
         data: { status: "REFUNDED" },
+      });
+
+      if (refundResult.count !== 1) {
+        return { success: false as const };
+      }
+
+      const userLimit = await tx.userApiLimit.findUnique({ where: { userId } });
+
+      if (!userLimit) {
+        throw new Error("User quota record not found during refund.");
+      }
+
+      const now = new Date();
+      if (isNewCalendarDay(userLimit.lastReset, now)) {
+        return { success: true as const };
+      }
+
+      const field = getCountField(operation.type as QuotaType);
+      const currentCount = userLimit[field];
+
+      await tx.userApiLimit.update({
+        where: { userId },
+        data: { [field]: Math.max(0, currentCount - 1) },
+      });
+
+      return { success: true as const };
+    });
+  } catch (error) {
+    console.error("[REFUND_QUOTA_ERROR]:", error);
+    return { success: false as const };
+  }
+}
+
+export async function getApiLimitCount(type: QuotaType): Promise<number> {
+  try {
+    const userId = await requireAuth();
+    const now = new Date();
+
+    return await prisma.$transaction(async (tx) => {
+      await tx.userApiLimit.upsert({
+        where: { userId },
+        create: { userId, chatCount: 0, extractionCount: 0, lastReset: now },
+        update: {},
       });
 
       const userLimit = await tx.userApiLimit.findUnique({ where: { userId } });
 
-      if (userLimit) {
-        await tx.userApiLimit.update({
-          where: { userId },
-          data: {
-            chatCount: operation.type === "CHAT" ? Math.max(0, userLimit.chatCount - 1) : userLimit.chatCount,
-            extractionCount: operation.type === "EXTRACTION" ? Math.max(0, userLimit.extractionCount - 1) : userLimit.extractionCount,
-          },
-        });
+      if (!userLimit) {
+        throw new Error("Unable to load user quota.");
       }
 
-      return { success: true, message: "Quota refunded." };
+      if (isNewCalendarDay(userLimit.lastReset, now)) {
+        await tx.userApiLimit.update({
+          where: { userId },
+          data: { chatCount: 0, extractionCount: 0, lastReset: now },
+        });
+        return 0;
+      }
+
+      return getCount(userLimit, type);
     });
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      console.error("[REFUND_QUOTA_ERROR]:", error.message);
-    }
-    return { success: false, message: "Refund failed." };
+  } catch (error) {
+    console.error("[GET_QUOTA_ERROR]:", error);
+    return 0;
   }
 }
-
-export const getApiLimitCount = async (type: QuotaType) => {
-  try {
-    const userId = await requireAuth();
-    const userLimit = await prisma.userApiLimit.findUnique({ where: { userId } });
-
-    if (!userLimit) return 0; 
-
-    const now = new Date();
-    const { isNewDay, chatCount, extractionCount } = getResetUserLimit(userLimit, now);
-
-    if (isNewDay) return 0;
-
-    return type === "CHAT" ? chatCount : extractionCount;
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      console.error("[GET_QUOTA_ERROR]:", error.message);
-    }
-    return 0; 
-  }
-};
