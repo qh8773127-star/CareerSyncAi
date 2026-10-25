@@ -4,6 +4,7 @@ import { prisma } from "./prisma";
 import { Prisma } from "@prisma/client";
 import { requireAuth } from "../actions/Job";
 import { MAX_EXTRACTIONS, MAX_CHATS } from "./constraints";
+import { redis } from "./redis";
 
 type QuotaType = "CHAT" | "EXTRACTION";
 
@@ -33,7 +34,6 @@ export async function consumeQuota(type: QuotaType, requestId: string) {
   try {
     const userId = await requireAuth();
 
-
     if (!requestId?.trim()) {
       return { success: false as const, error: "Invalid request ID." };
     }
@@ -42,9 +42,8 @@ export async function consumeQuota(type: QuotaType, requestId: string) {
     const dayStart = new Date(now);
     dayStart.setHours(0, 0, 0, 0);
 
-    return await prisma.$transaction(
+    const txResult = await prisma.$transaction(
       async (tx) => {
-
         await tx.userApiLimit.upsert({
           where: { userId },
           create: { userId, chatCount: 0, extractionCount: 0, lastReset: now },
@@ -105,6 +104,10 @@ export async function consumeQuota(type: QuotaType, requestId: string) {
       },
       { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
     );
+    if (txResult.success) {
+      await redis.del(`api_limit:${userId}:${type}`);
+    }
+    return txResult;
   } catch (error) {
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -138,7 +141,7 @@ export async function refundQuota(requestId: string) {
       return { success: false as const };
     }
 
-    return await prisma.$transaction(async (tx) => {
+    const txResult = await prisma.$transaction(async (tx) => {
       const operation = await tx.quotaOperation.findUnique({
         where: { userId_requestId: { userId, requestId } },
       });
@@ -175,31 +178,37 @@ export async function refundQuota(requestId: string) {
         data: { [field]: Math.max(0, currentCount - 1) },
       });
 
-      return { success: true as const };
+      return { success: true as const, type: operation.type };
     });
+
+    if (txResult.success && txResult.type) {
+      await redis.del(`api_limit:${userId}:${txResult.type}`);
+    }
+
+    return { success: txResult.success };
   } catch (error) {
     console.error("[REFUND_QUOTA_ERROR]:", error);
     return { success: false as const };
   }
 }
-
 export async function getApiLimitCount(type: QuotaType): Promise<number> {
+  const userId = await requireAuth();
+
   try {
-    const userId = await requireAuth();
+    const cacheKey = `api_limit:${userId}:${type}`;
+    const cachedLimit = await redis.get<number>(cacheKey);
+    if (cachedLimit !== null) {
+      return cachedLimit;
+    }
+
     const now = new Date();
 
-    return await prisma.$transaction(async (tx) => {
-      await tx.userApiLimit.upsert({
+    const finalCount = await prisma.$transaction(async (tx) => {
+      const userLimit = await tx.userApiLimit.upsert({
         where: { userId },
         create: { userId, chatCount: 0, extractionCount: 0, lastReset: now },
         update: {},
       });
-
-      const userLimit = await tx.userApiLimit.findUnique({ where: { userId } });
-
-      if (!userLimit) {
-        throw new Error("Unable to load user quota.");
-      }
 
       if (isNewCalendarDay(userLimit.lastReset, now)) {
         await tx.userApiLimit.update({
@@ -211,6 +220,10 @@ export async function getApiLimitCount(type: QuotaType): Promise<number> {
 
       return getCount(userLimit, type);
     });
+
+    await redis.set(cacheKey, finalCount, { ex: 3600 });
+
+    return finalCount;
   } catch (error) {
     console.error("[GET_QUOTA_ERROR]:", error);
     return 0;
