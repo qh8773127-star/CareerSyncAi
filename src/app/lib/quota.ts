@@ -30,6 +30,10 @@ function getCountField(type: QuotaType): "chatCount" | "extractionCount" {
   return type === "CHAT" ? "chatCount" : "extractionCount";
 }
 
+function getQuotaCacheKey(userId: string, type: QuotaType): string {
+  return `api_limit:${userId}:${type}`;
+}
+
 export async function consumeQuota(type: QuotaType, requestId: string) {
   try {
     const userId = await requireAuth();
@@ -105,8 +109,13 @@ export async function consumeQuota(type: QuotaType, requestId: string) {
       { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
     );
     if (txResult.success) {
-      await redis.del(`api_limit:${userId}:${type}`);
+      try {
+        await redis.del(getQuotaCacheKey(userId, type));
+      } catch (redisError) {
+        console.error("[CONSUME_CACHE_INVALIDATE_ERROR]:", redisError);
+      }
     }
+
     return txResult;
   } catch (error) {
     if (
@@ -166,8 +175,12 @@ export async function refundQuota(requestId: string) {
       }
 
       const now = new Date();
+
       if (isNewCalendarDay(userLimit.lastReset, now)) {
-        return { success: true as const };
+        return {
+          success: true as const,
+          type: operation.type as QuotaType,
+        };
       }
 
       const field = getCountField(operation.type as QuotaType);
@@ -178,11 +191,17 @@ export async function refundQuota(requestId: string) {
         data: { [field]: Math.max(0, currentCount - 1) },
       });
 
-      return { success: true as const, type: operation.type };
+      return {
+        success: true as const,
+        type: operation.type as QuotaType,
+      };
     });
-
-    if (txResult.success && txResult.type) {
-      await redis.del(`api_limit:${userId}:${txResult.type}`);
+    if (txResult.success) {
+      try {
+        await redis.del(getQuotaCacheKey(userId, txResult.type));
+      } catch (redisError) {
+        console.error("[REFUND_CACHE_INVALIDATE_ERROR]:", redisError);
+      }
     }
 
     return { success: txResult.success };
@@ -191,41 +210,49 @@ export async function refundQuota(requestId: string) {
     return { success: false as const };
   }
 }
+
 export async function getApiLimitCount(type: QuotaType): Promise<number> {
   const userId = await requireAuth();
-
+  const cacheKey = getQuotaCacheKey(userId, type);
   try {
-    const cacheKey = `api_limit:${userId}:${type}`;
-    const cachedLimit = await redis.get<number>(cacheKey);
-    if (cachedLimit !== null) {
-      return cachedLimit;
-    }
-
-    const now = new Date();
-
-    const finalCount = await prisma.$transaction(async (tx) => {
-      const userLimit = await tx.userApiLimit.upsert({
-        where: { userId },
-        create: { userId, chatCount: 0, extractionCount: 0, lastReset: now },
-        update: {},
-      });
-
-      if (isNewCalendarDay(userLimit.lastReset, now)) {
-        await tx.userApiLimit.update({
-          where: { userId },
-          data: { chatCount: 0, extractionCount: 0, lastReset: now },
-        });
-        return 0;
+    const cached = await redis.get<number | string>(cacheKey);
+    if (cached !== null && cached !== undefined) {
+      const parsed = Number(cached);
+      if (Number.isFinite(parsed)) {
+        return parsed;
       }
+    }
+  } catch (redisError) {
+    console.error("[GET_QUOTA_CACHE_READ_ERROR]:", redisError);
 
-      return getCount(userLimit, type);
+  }
+
+  const now = new Date();
+
+  const finalCount = await prisma.$transaction(async (tx) => {
+    const userLimit = await tx.userApiLimit.upsert({
+      where: { userId },
+      create: { userId, chatCount: 0, extractionCount: 0, lastReset: now },
+      update: {},
     });
 
-    await redis.set(cacheKey, finalCount, { ex: 3600 });
+    if (isNewCalendarDay(userLimit.lastReset, now)) {
+      await tx.userApiLimit.update({
+        where: { userId },
+        data: { chatCount: 0, extractionCount: 0, lastReset: now },
+      });
+      return 0;
+    }
 
-    return finalCount;
-  } catch (error) {
-    console.error("[GET_QUOTA_ERROR]:", error);
-    return 0;
+    return getCount(userLimit, type);
+  });
+
+  // 3. Cache write — best effort
+  try {
+    await redis.set(cacheKey, finalCount, { ex: 300 });
+  } catch (redisError) {
+    console.error("[GET_QUOTA_CACHE_WRITE_ERROR]:", redisError);
   }
+
+  return finalCount;
 }
