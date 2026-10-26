@@ -12,6 +12,7 @@ import { Prisma } from "@prisma/client";
 import { ActionResult, AppError } from "../lib/Error";
 import { type JobAnalysisResult } from "../lib/validations";
 import { redis } from "../lib/redis";
+import { JobStats,EMPTY_STATS } from "../lib/constraints";
 
 export async function requireAuth(): Promise<string> {
   const session = await auth();
@@ -237,63 +238,41 @@ export async function updateJobStatus(jobId: unknown, newStatus: unknown) {
   }
 }
 
-export async function getJobStats() {
+export async function getJobStats(): Promise<JobStats> {
   const userId = await requireAuth();
   const cacheKey = `user_jobs_stats:${userId}`;
+
   try {
-    const cachedStats = await redis.get(cacheKey);
-    if (cachedStats) {
+    const cached = await redis.get<JobStats>(cacheKey);
+    if (cached !== null && cached !== undefined) {
       console.log("🔥 REDIS CACHE HIT (Stats): Neon DB zinda bach gaya!");
-      return cachedStats;
+      return cached;
     }
   } catch (redisError) {
     console.error("[REDIS_READ_ERROR_STATS]:", redisError);
   }
-
   console.log("💀 NEON DB HIT (Stats): Redis khali tha, DB ragra gaya!");
-  try {
-    const statusCounts = await prisma.job.groupBy({
-      by: ["status"],
-      where: {
-        userId,
-      },
-      _count: {
-        status: true,
-      },
-    });
+  const statusCounts = await prisma.job.groupBy({
+    by: ["status"],
+    where: { userId },
+    _count: { status: true },
+  });
+  const stats: JobStats = { ...EMPTY_STATS };
 
-    const stats = {
-      total: 0,
-      PENDING: 0,
-      INTERVIEW: 0,
-      REJECTED: 0,
-      HIRED: 0,
-    };
-
-    for (const item of statusCounts) {
-      const count = item._count.status;
-
-      stats[item.status as keyof typeof stats] = count;
+  for (const item of statusCounts) {
+    const count = item._count.status;
+    if (item.status in stats) {
+      stats[item.status as keyof Omit<JobStats, "total">] = count;
       stats.total += count;
     }
-
-    try {
-      await redis.set(cacheKey, stats, { ex: 3600 });
-    } catch (redisWriteError) {
-      console.error("[REDIS_WRITE_ERROR_STATS]:", redisWriteError);
-    }
-    return stats;
-  } catch (error) {
-    console.error("Get Job Stats Error:", error);
-
-    return {
-      total: 0,
-      PENDING: 0,
-      INTERVIEW: 0,
-      REJECTED: 0,
-      HIRED: 0,
-    };
   }
+  try {
+    await redis.set(cacheKey, stats, { ex: 300 });
+  } catch (redisWriteError) {
+    console.error("[REDIS_WRITE_ERROR_STATS]:", redisWriteError);
+  }
+
+  return stats;
 }
 
 export async function getFilteredJobs(inputParams: unknown) {

@@ -1,14 +1,6 @@
 "use client";
-interface DashboardStatsProps {
-  stats: {
-    total: number;
-    PENDING: number;
-    INTERVIEW: number;
-    REJECTED: number;
-    HIRED: number;
-  };
-}
 
+import { DashboardStatsProps } from "../lib/constraints";
 const DashboardStats = ({ stats }: DashboardStatsProps) => {
   const statCards = [
     {
