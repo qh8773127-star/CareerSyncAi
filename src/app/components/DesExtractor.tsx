@@ -35,7 +35,7 @@ function MetaBadge({
   );
 }
 
-export default function AiTester() {
+export default function DesExtractor() {
   const [jobInput, setJobInput] = useState("");
   const [aiResponse, setAiResponse] =
     useState<JobAnalysisResult | null>(null);
