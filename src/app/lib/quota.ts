@@ -48,19 +48,12 @@ export async function consumeQuota(type: QuotaType, requestId: string) {
 
     const txResult = await prisma.$transaction(
       async (tx) => {
-        await tx.userApiLimit.upsert({
+  
+        const userLimit = await tx.userApiLimit.upsert({
           where: { userId },
           create: { userId, chatCount: 0, extractionCount: 0, lastReset: now },
           update: {},
         });
-
-        const userLimit = await tx.userApiLimit.findUnique({
-          where: { userId },
-        });
-
-        if (!userLimit) {
-          throw new Error("Unable to load user quota.");
-        }
 
         let currentChatCount = userLimit.chatCount;
         let currentExtractionCount = userLimit.extractionCount;
@@ -108,11 +101,14 @@ export async function consumeQuota(type: QuotaType, requestId: string) {
       },
       { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
     );
+
     if (txResult.success) {
       try {
-        await redis.del(getQuotaCacheKey(userId, type));
+        await redis.set(getQuotaCacheKey(userId, type), txResult.used, {
+          ex: 300,
+        });
       } catch (redisError) {
-        console.error("[CONSUME_CACHE_INVALIDATE_ERROR]:", redisError);
+        console.error("[CONSUME_CACHE_WRITE_ERROR]:", redisError);
       }
     }
 
@@ -214,6 +210,7 @@ export async function refundQuota(requestId: string) {
 export async function getApiLimitCount(type: QuotaType): Promise<number> {
   const userId = await requireAuth();
   const cacheKey = getQuotaCacheKey(userId, type);
+
   try {
     const cached = await redis.get<number | string>(cacheKey);
     if (cached !== null && cached !== undefined) {
@@ -224,30 +221,28 @@ export async function getApiLimitCount(type: QuotaType): Promise<number> {
     }
   } catch (redisError) {
     console.error("[GET_QUOTA_CACHE_READ_ERROR]:", redisError);
-
   }
 
   const now = new Date();
+  const todayStart = new Date(now);
+  todayStart.setHours(0, 0, 0, 0);
 
-  const finalCount = await prisma.$transaction(async (tx) => {
-    const userLimit = await tx.userApiLimit.upsert({
-      where: { userId },
-      create: { userId, chatCount: 0, extractionCount: 0, lastReset: now },
-      update: {},
-    });
-
-    if (isNewCalendarDay(userLimit.lastReset, now)) {
-      await tx.userApiLimit.update({
-        where: { userId },
-        data: { chatCount: 0, extractionCount: 0, lastReset: now },
-      });
-      return 0;
-    }
-
-    return getCount(userLimit, type);
+  const userLimit = await prisma.userApiLimit.upsert({
+    where: { userId },
+    create: { userId, chatCount: 0, extractionCount: 0, lastReset: now },
+    update: {},
   });
 
-  // 3. Cache write — best effort
+  let finalCount: number;
+  if (userLimit.lastReset < todayStart) {
+    await prisma.userApiLimit.updateMany({
+      where: { userId, lastReset: { lt: todayStart } },
+      data: { chatCount: 0, extractionCount: 0, lastReset: now },
+    });
+    finalCount = 0;
+  } else {
+    finalCount = getCount(userLimit, type);
+  }
   try {
     await redis.set(cacheKey, finalCount, { ex: 300 });
   } catch (redisError) {
