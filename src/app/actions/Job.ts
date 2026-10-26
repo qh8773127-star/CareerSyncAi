@@ -1,5 +1,4 @@
 "use server";
-//import
 import {
   createJobSchema,
   filterJobsSchema,
@@ -12,8 +11,8 @@ import { prisma } from "../lib/prisma";
 import { Prisma } from "@prisma/client";
 import { ActionResult, AppError } from "../lib/Error";
 import { type JobAnalysisResult } from "../lib/validations";
+import { redis } from "../lib/redis";
 
-//Oauth
 export async function requireAuth(): Promise<string> {
   const session = await auth();
 
@@ -23,8 +22,6 @@ export async function requireAuth(): Promise<string> {
 
   return session.user.id;
 }
-
-//Error MSG
 const DUPLICATE_ERROR = {
   success: false as const,
   code: "DUPLICATE_RECORD" as const,
@@ -32,9 +29,8 @@ const DUPLICATE_ERROR = {
 };
 
 export async function deleteAll(): Promise<ActionResult<null>> {
+  const userId = await requireAuth();
   try {
-    const userId = await requireAuth();
-
     const count = await prisma.job.count({
       where: { userId },
     });
@@ -48,9 +44,8 @@ export async function deleteAll(): Promise<ActionResult<null>> {
     await prisma.job.deleteMany({
       where: { userId },
     });
-
+    await redis.del(`user_jobs_stats:${userId}`);
     return { success: true, data: null };
-    revalidatePath("/dashboard");
   } catch (error) {
     if (error instanceof AppError) {
       return {
@@ -66,13 +61,11 @@ export async function deleteAll(): Promise<ActionResult<null>> {
     };
   }
 }
-//Create
+
 export async function createJob(formData: unknown) {
+  const userId = await requireAuth();
   try {
-    const userId = await requireAuth();
-
     const validation = createJobSchema.safeParse(formData);
-
     if (!validation.success) {
       return {
         success: false as const,
@@ -118,8 +111,8 @@ export async function createJob(formData: unknown) {
       },
     });
 
+    await redis.del(`user_jobs_stats:${userId}`);
     revalidatePath("/dashboard");
-
     return {
       success: true as const,
     };
@@ -174,8 +167,8 @@ export async function deleteJob(jobId: unknown) {
       };
     }
 
+    await redis.del(`user_jobs_stats:${userId}`);
     revalidatePath("/dashboard");
-
     return {
       success: true as const,
     };
@@ -229,8 +222,8 @@ export async function updateJobStatus(jobId: unknown, newStatus: unknown) {
       };
     }
 
+    await redis.del(`user_jobs_stats:${userId}`);
     revalidatePath("/dashboard");
-
     return {
       success: true as const,
     };
@@ -245,9 +238,20 @@ export async function updateJobStatus(jobId: unknown, newStatus: unknown) {
 }
 
 export async function getJobStats() {
+  const userId = await requireAuth();
+  const cacheKey = `user_jobs_stats:${userId}`;
   try {
-    const userId = await requireAuth();
+    const cachedStats = await redis.get(cacheKey);
+    if (cachedStats) {
+      console.log("🔥 REDIS CACHE HIT (Stats): Neon DB zinda bach gaya!");
+      return cachedStats;
+    }
+  } catch (redisError) {
+    console.error("[REDIS_READ_ERROR_STATS]:", redisError);
+  }
 
+  console.log("💀 NEON DB HIT (Stats): Redis khali tha, DB ragra gaya!");
+  try {
     const statusCounts = await prisma.job.groupBy({
       by: ["status"],
       where: {
@@ -273,6 +277,11 @@ export async function getJobStats() {
       stats.total += count;
     }
 
+    try {
+      await redis.set(cacheKey, stats, { ex: 3600 });
+    } catch (redisWriteError) {
+      console.error("[REDIS_WRITE_ERROR_STATS]:", redisWriteError);
+    }
     return stats;
   } catch (error) {
     console.error("Get Job Stats Error:", error);
@@ -345,7 +354,7 @@ export async function getFilteredJobs(inputParams: unknown) {
     ]);
 
     const totalPages = Math.ceil(totalJobsCount / itemsPerPage);
-
+    await redis.del(`user_jobs_stats:${userId}`);
     return {
       jobs,
       totalPages,
@@ -384,6 +393,7 @@ export async function saveJobToDatabase(jobData: JobAnalysisResult) {
         userId,
       },
     });
+    await redis.del(`user_jobs_stats:${userId}`);
     return { success: true, job: newJob };
   } catch (error) {
     console.error("Prisma Crash:", error);
