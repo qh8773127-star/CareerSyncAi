@@ -12,7 +12,7 @@ import { Prisma } from "@prisma/client";
 import { ActionResult, AppError } from "../lib/Error";
 import { type JobAnalysisResult } from "../lib/validations";
 import { redis } from "../lib/redis";
-import { JobStats,EMPTY_STATS } from "../lib/constraints";
+import { JobStats, EMPTY_STATS } from "../lib/constraints";
 
 export async function requireAuth(): Promise<string> {
   const session = await auth();
@@ -191,9 +191,8 @@ export async function deleteJob(jobId: unknown) {
 }
 
 export async function updateJobStatus(jobId: unknown, newStatus: unknown) {
+  const userId = await requireAuth();
   try {
-    const userId = await requireAuth();
-
     const validation = updateJobStatusSchema.safeParse({
       jobId,
       status: newStatus,
@@ -245,13 +244,11 @@ export async function getJobStats(): Promise<JobStats> {
   try {
     const cached = await redis.get<JobStats>(cacheKey);
     if (cached !== null && cached !== undefined) {
-      console.log("🔥 REDIS CACHE HIT (Stats): Neon DB zinda bach gaya!");
       return cached;
     }
   } catch (redisError) {
     console.error("[REDIS_READ_ERROR_STATS]:", redisError);
   }
-  console.log("💀 NEON DB HIT (Stats): Redis khali tha, DB ragra gaya!");
   const statusCounts = await prisma.job.groupBy({
     by: ["status"],
     where: { userId },
@@ -276,9 +273,8 @@ export async function getJobStats(): Promise<JobStats> {
 }
 
 export async function getFilteredJobs(inputParams: unknown) {
+  const userId = await requireAuth();
   try {
-    const userId = await requireAuth();
-
     const validation = filterJobsSchema.safeParse(inputParams ?? {});
 
     if (!validation.success) {
@@ -349,9 +345,8 @@ export async function getFilteredJobs(inputParams: unknown) {
 }
 
 export async function saveJobToDatabase(jobData: JobAnalysisResult) {
+  const userId = await requireAuth();
   try {
-    const userId = await requireAuth();
-
     const existingJob = await prisma.job.findFirst({
       where: { userId, title: jobData.role, company: jobData.company },
       select: { id: true },

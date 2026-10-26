@@ -7,7 +7,7 @@ import DashboardStats from "@/app/components/DashboardStats";
 import JobSearchFilters from "@/app/components/JobSearchFilters";
 import Pagination from "@/app/components/Pagination";
 import { getFilteredJobs } from "@/app/actions/Job";
-import AiTester from "@/app/components/AiTester";
+import DesExtractor from "@/app/components/DesExtractor";
 
 export default async function DashboardPage({
   searchParams,
@@ -40,7 +40,7 @@ export default async function DashboardPage({
       </section>
 
       <section>
-        <AiTester />
+        <DesExtractor />
       </section>
 
       <section className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
