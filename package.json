@@ -11,8 +11,9 @@
     "eval": "tsx evals/run.ts"
   },
   "dependencies": {
-    "@ai-sdk/google": "^4.0.93",
+    "@ai-sdk/google": "^4.0.112",
     "@ai-sdk/groq": "^4.0.59",
+    "@ai-sdk/openai": "^4.0.109",
     "@ai-sdk/react": "^4.0.140",
     "@auth/prisma-adapter": "^2.11.3",
     "@hookform/resolvers": "^5.9.1",

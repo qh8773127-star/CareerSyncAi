@@ -20,3 +20,10 @@ export const EMPTY_STATS: JobStats = {
 export interface DashboardStatsProps {
   stats: JobStats;
 }
+export interface GetEmbedding {
+  jobId:string,
+  title:string,
+  company:string,
+  summary:string,
+  skills:string[]
+}

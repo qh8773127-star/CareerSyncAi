@@ -13,6 +13,7 @@ import { ActionResult, AppError } from "../lib/Error";
 import { type JobAnalysisResult } from "../lib/validations";
 import { redis } from "../lib/redis";
 import { JobStats, EMPTY_STATS } from "../lib/constraints";
+import { generateAndSaveEmbedding } from "../lib/rag";
 
 export async function requireAuth(): Promise<string> {
   const session = await auth();
@@ -98,7 +99,7 @@ export async function createJob(formData: unknown) {
           )
       : [];
 
-    await prisma.job.create({
+    const newJob = await prisma.job.create({
       data: {
         title: validation.data.title,
         company: validation.data.company,
@@ -113,6 +114,15 @@ export async function createJob(formData: unknown) {
     });
 
     await redis.del(`user_jobs_stats:${userId}`);
+
+    generateAndSaveEmbedding({
+      jobId: newJob.id,
+      title: newJob.title,
+      company: newJob.company,
+      summary: newJob.summary || "Not Specified",
+      skills: newJob.skills || [],
+    });
+
     revalidatePath("/dashboard");
     return {
       success: true as const,
@@ -368,6 +378,15 @@ export async function saveJobToDatabase(jobData: JobAnalysisResult) {
       },
     });
     await redis.del(`user_jobs_stats:${userId}`);
+
+    generateAndSaveEmbedding({
+      jobId: newJob.id,
+      title: newJob.title,
+      company: newJob.company,
+      summary: newJob.summary || "Not Specified",
+      skills: newJob.skills || [],
+    });
+
     return { success: true, job: newJob };
   } catch (error) {
     console.error("Prisma Crash:", error);
