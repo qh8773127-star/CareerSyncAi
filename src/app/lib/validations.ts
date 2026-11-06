@@ -172,4 +172,3 @@ export const ToolSchemaForDeleteJob = z.object({
 export const ToolSchemaForDeleteAllJobs = z.object({
 confirmation: z.boolean()
 });
-

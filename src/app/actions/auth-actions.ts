@@ -1,5 +1,6 @@
 "use server"
 import {signIn, signOut } from "../auth";
+import { prisma } from "../lib/prisma";
 
 export async function loginWithGithub(){
     await signIn("github",{ redirectTo: "/dashboard" });

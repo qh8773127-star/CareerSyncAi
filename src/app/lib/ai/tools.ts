@@ -13,6 +13,8 @@ import {
   TOOL_DESC_DELETE_ONE_JOB,
   TOOL_DESC_DELETE_ALL_JOB,
 } from "./prompt";
+import { parseSkillsToArray } from "@/app/utils/stringUtils";
+import { generateAndSaveEmbedding } from "../rag";
 
 export const updateJobStatus = tool({
   description: TOOL_DESC_UPDATE_JOB,
@@ -21,26 +23,33 @@ export const updateJobStatus = tool({
 
   execute: async ({ title, company, status }) => {
     const userId = await requireAuth();
-    const updatedResult = await prisma.job.updateMany({
-      where: {
-        userId,
-        title,
-        company,
-      },
-      data: { status },
-    });
+    try {
+      const updatedResult = await prisma.job.updateMany({
+        where: {
+          userId,
+          title,
+          company,
+        },
+        data: { status },
+      });
 
-    if (updatedResult.count === 0) {
+      if (updatedResult.count === 0) {
+        return {
+          success: false,
+          message: "Failed: Job not found.",
+        };
+      }
+
+      return {
+        success: true,
+        message: `Success: Job status updated to ${status}.`,
+      };
+    } catch (error: unknown) {
       return {
         success: false,
-        message: "Failed: Job not found.",
+        message: `Failed: ${error instanceof Error ? error.message : "Unknown error"}`,
       };
     }
-
-    return {
-      success: true,
-      message: `Success: Job status updated to ${status}.`,
-    };
   },
 });
 
@@ -56,19 +65,9 @@ export const addJobApplication = tool({
     skills,
     status,
   }) => {
+    const userId = await requireAuth();
     try {
-      const userId = await requireAuth();
-      const skillsArray = skills
-        ? skills
-            .split(",")
-            .map((s) => s.trim())
-            .filter(Boolean)
-            .filter(
-              (s, i, arr) =>
-                arr.findIndex((x) => x.toLowerCase() === s.toLowerCase()) === i,
-            )
-        : [];
-
+      const skillsArray = parseSkillsToArray(skills);
       const addJob = await prisma.job.create({
         data: {
           userId,
@@ -83,14 +82,21 @@ export const addJobApplication = tool({
           status: status || "PENDING",
         },
       });
+          generateAndSaveEmbedding({
+            jobId: addJob.id,
+            title: addJob.title,
+            company: addJob.company,
+            summary: addJob.summary || "Not Specified",
+            skills: addJob.skills || [],
+          });
       return {
         success: true,
         message: `Success: Added new job ${title} at ${company} with status ${status}.`,
       };
-    } catch (error) {
+    } catch (error: unknown) {
       return {
         success: false,
-        message: `Failed to add job application to the database.${error}`,
+        message: `Failed to add job application to the database.${error instanceof Error ? error.message : "Unknown error"}`,
       };
     }
   },
@@ -101,8 +107,8 @@ export const deleteSpecificJob = tool({
 
   inputSchema: ToolSchemaForDeleteJob,
   execute: async ({ title, company }) => {
+    const userId = await requireAuth();
     try {
-      const userId = await requireAuth();
       const DelJob = await prisma.job.deleteMany({
         where: { userId, title, company },
       });
@@ -116,10 +122,10 @@ export const deleteSpecificJob = tool({
         success: true,
         message: `Success: Successfully deleted ${title} at ${company} from the database.`,
       };
-    } catch (error) {
+    } catch (error: unknown) {
       return {
         success: false,
-        message: `Failed to delte job application to the database.${error}`,
+        message: `Failed to delete job application from the database.${error instanceof Error ? error.message : "Unknown error"}`,
       };
     }
   },
@@ -129,8 +135,8 @@ export const deleteAllJobs = tool({
   description: TOOL_DESC_DELETE_ALL_JOB,
   inputSchema: ToolSchemaForDeleteAllJobs,
   execute: async () => {
+    const userId = await requireAuth();
     try {
-      const userId = await requireAuth();
       const DelAll = await prisma.job.deleteMany({
         where: { userId },
       });
@@ -145,10 +151,10 @@ export const deleteAllJobs = tool({
         success: true,
         message: `Success: Cleared the tracker. Deleted ${DelAll.count} jobs from the database.`,
       };
-    } catch (error) {
+    } catch (error: unknown) {
       return {
         success: false,
-        message: `Failed to delte job application to the database.${error}`,
+        message: `Failed to delete job application from the database.${error instanceof Error ? error.message : "Unknown error"}`,
       };
     }
   },

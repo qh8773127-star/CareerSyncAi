@@ -14,6 +14,7 @@ import { type JobAnalysisResult } from "../lib/validations";
 import { redis } from "../lib/redis";
 import { JobStats, EMPTY_STATS } from "../lib/constraints";
 import { generateAndSaveEmbedding } from "../lib/rag";
+import { parseSkillsToArray } from "../utils/stringUtils";
 
 export async function requireAuth(): Promise<string> {
   const session = await auth();
@@ -88,17 +89,7 @@ export async function createJob(formData: unknown) {
     if (existingJob) {
       return DUPLICATE_ERROR;
     }
-    const skillsArray = validation.data.skills
-      ? validation.data.skills
-          .split(",")
-          .map((s) => s.trim())
-          .filter(Boolean)
-          .filter(
-            (s, i, arr) =>
-              arr.findIndex((x) => x.toLowerCase() === s.toLowerCase()) === i,
-          )
-      : [];
-
+    const skillsArray = parseSkillsToArray(validation.data.skills);
     const newJob = await prisma.job.create({
       data: {
         title: validation.data.title,
