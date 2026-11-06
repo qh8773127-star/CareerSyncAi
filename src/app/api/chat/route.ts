@@ -11,7 +11,6 @@ import { requireAuth } from "@/app/actions/Job";
 import { chatRequestSchema } from "@/app/lib/validations";
 import { AppError } from "@/app/lib/Error";
 import { redis } from "@/app/lib/redis";
-import { getJobsContext } from "@/app/lib/ai/context";
 import {
   updateJobStatus,
   addJobApplication,
@@ -20,6 +19,7 @@ import {
 } from "@/app/lib/ai/tools";
 import { consumeQuota, refundQuota } from "@/app/lib/quota";
 import { NextResponse } from "next/server";
+import { retrieveRelevantJobs } from "@/app/lib/rag";
 
 const ratelimit = new Ratelimit({
   redis: redis,
@@ -59,7 +59,6 @@ export async function POST(req: Request) {
         },
       );
     }
-
     const quota = await consumeQuota("CHAT", requestId);
 
     if (!quota.success) {
@@ -71,12 +70,37 @@ export async function POST(req: Request) {
 
     const messages = parseData.data.messages as UIMessage[];
 
-    const liveContext = await getJobsContext();
+    const lastMessage = messages[messages.length - 1];
+    let userQuery = "";
+
+    if (typeof lastMessage.parts === "string") {
+      userQuery = lastMessage.parts;
+    } else if (Array.isArray(lastMessage.parts)) {
+      userQuery = lastMessage.parts
+        .filter((p): p is { type: "text"; text: string } => p.type === "text")
+        .map((p) => p.text)
+        .join(" ");
+    }
+
+    if (!userQuery.trim()) {
+      userQuery = "Show me my recently saved jobs";
+    }
+
+    const relevantJobs = await retrieveRelevantJobs(userId, userQuery);
+    let contextText = "No relevant jobs found in the user's database.";
+    if (relevantJobs.length > 0) {
+      contextText = relevantJobs
+        .map(
+          (job) =>
+            `- Job: ${job.title} at ${job.company}\n  Summary: ${job.summary || "N/A"}\n  Skills: ${job.skills.join(", ")}`,
+        )
+        .join("\n\n");
+    }
 
     const result = await streamText({
       model: groq("openai/gpt-oss-120b"),
       messages: await convertToModelMessages(messages),
-      system: CAREERSYNC_SYSTEM_PROMPT(liveContext),
+      system: CAREERSYNC_SYSTEM_PROMPT(contextText),
 
       tools: {
         updateJobStatus,

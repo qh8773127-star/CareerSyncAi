@@ -27,3 +27,11 @@ export interface GetEmbedding {
   summary:string,
   skills:string[]
 }
+export type RetrievedJob = {
+  id: string;
+  title: string;
+  company: string;
+  summary: string | null;
+  skills: string[];
+  similarity: number;
+};

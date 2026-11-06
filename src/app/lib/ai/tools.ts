@@ -15,6 +15,8 @@ import {
 } from "./prompt";
 import { parseSkillsToArray } from "@/app/utils/stringUtils";
 import { generateAndSaveEmbedding } from "../rag";
+import { after } from "next/server";
+import { WaitUntil } from "next/dist/server/after/builtin-request-context";
 
 export const updateJobStatus = tool({
   description: TOOL_DESC_UPDATE_JOB,
@@ -82,13 +84,13 @@ export const addJobApplication = tool({
           status: status || "PENDING",
         },
       });
-          generateAndSaveEmbedding({
-            jobId: addJob.id,
-            title: addJob.title,
-            company: addJob.company,
-            summary: addJob.summary || "Not Specified",
-            skills: addJob.skills || [],
-          });
+      after(() => generateAndSaveEmbedding({
+        jobId: addJob.id,
+        title: addJob.title,
+        company: addJob.company,
+        summary: addJob.summary || "Not Specified",
+        skills: addJob.skills || [],
+      }));
       return {
         success: true,
         message: `Success: Added new job ${title} at ${company} with status ${status}.`,
