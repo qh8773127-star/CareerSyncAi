@@ -169,6 +169,7 @@ export const ToolSchemaForDeleteJob = z.object({
     .min(1, "Company cannot be empty")
     .describe("The company name"),
 });
+
 export const ToolSchemaForDeleteAllJobs = z.object({
 confirmation: z.boolean()
 });

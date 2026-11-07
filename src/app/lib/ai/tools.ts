@@ -16,7 +16,6 @@ import {
 import { parseSkillsToArray } from "@/app/utils/stringUtils";
 import { generateAndSaveEmbedding } from "../rag";
 import { after } from "next/server";
-import { WaitUntil } from "next/dist/server/after/builtin-request-context";
 
 export const updateJobStatus = tool({
   description: TOOL_DESC_UPDATE_JOB,

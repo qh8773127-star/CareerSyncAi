@@ -42,6 +42,7 @@ export async function generateAndSaveEmbedding({
     );
   }
 }
+
 export async function retrieveRelevantJobs(userId: string, query: string) {
   try {
     const { embedding } = await embed({

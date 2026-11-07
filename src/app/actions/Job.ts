@@ -15,7 +15,6 @@ import { redis } from "../lib/redis";
 import { JobStats, EMPTY_STATS } from "../lib/constraints";
 import { generateAndSaveEmbedding } from "../lib/rag";
 import { parseSkillsToArray } from "../utils/stringUtils";
-import { WaitUntil } from "next/dist/server/after/builtin-request-context";
 import { after } from "next/server";
 
 export async function requireAuth(): Promise<string> {

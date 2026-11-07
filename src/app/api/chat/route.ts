@@ -59,6 +59,7 @@ export async function POST(req: Request) {
         },
       );
     }
+    
     const quota = await consumeQuota("CHAT", requestId);
 
     if (!quota.success) {
