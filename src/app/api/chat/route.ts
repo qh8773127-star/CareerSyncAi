@@ -20,6 +20,7 @@ import {
 import { consumeQuota, refundQuota } from "@/app/lib/quota";
 import { NextResponse } from "next/server";
 import { retrieveRelevantJobs } from "@/app/lib/rag";
+import { prisma } from "@/app/lib/prisma";
 
 const ratelimit = new Ratelimit({
   redis: redis,
@@ -59,7 +60,7 @@ export async function POST(req: Request) {
         },
       );
     }
-    
+
     const quota = await consumeQuota("CHAT", requestId);
 
     if (!quota.success) {
@@ -71,9 +72,10 @@ export async function POST(req: Request) {
 
     const messages = parseData.data.messages as UIMessage[];
 
+    const chatId = body.chatId || crypto.randomUUID();
+
     const lastMessage = messages[messages.length - 1];
     let userQuery = "";
-
     if (typeof lastMessage.parts === "string") {
       userQuery = lastMessage.parts;
     } else if (Array.isArray(lastMessage.parts)) {
@@ -82,8 +84,17 @@ export async function POST(req: Request) {
         .map((p) => p.text)
         .join(" ");
     }
+    if (userQuery.trim() !== "") {
+      await prisma.chat.upsert({
+        where: { id: chatId },
+        update: { updatedAt: new Date() },
+        create: { id: chatId, userId, title: userQuery.substring(0, 30) },
+      });
 
-    if (!userQuery.trim()) {
+      await prisma.message.create({
+        data: { chatId, role: "user", content: userQuery },
+      });
+    } else {
       userQuery = "Show me my recently saved jobs";
     }
 
@@ -111,9 +122,23 @@ export async function POST(req: Request) {
       },
 
       stopWhen: stepCountIs(3),
+
+      onFinish: async ({ text }) => {
+        try {
+          await prisma.message.create({
+            data: { chatId, role: "assistant", content: text },
+          });
+        } catch (error) {
+          console.error("Failed to save AI message:", error);
+        }
+      },
     });
 
-    return result.toUIMessageStreamResponse();
+    return result.toUIMessageStreamResponse({
+      headers: {
+        "x-chat-id": chatId,
+      },
+    });
   } catch (error) {
     if (error instanceof AppError) {
       await refundQuota(requestId);

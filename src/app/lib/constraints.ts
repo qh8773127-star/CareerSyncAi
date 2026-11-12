@@ -35,3 +35,10 @@ export type RetrievedJob = {
   skills: string[];
   similarity: number;
 };
+
+export const THINKING_MESSAGES = [
+  "Thinking...",
+  "Analyzing...",
+  "Reviewing...",
+  "Crafting...",
+];
