@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
-import SignOut from "./SignOut"; // Apna path check karein
+import SignOut from "./SignOut";
 
 const NAV_LINKS = [
   { href: "/dashboard/jobs", label: "Jobs" },
@@ -15,7 +15,6 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdown on outside click
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -52,7 +51,6 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu Button */}
       <div className="md:hidden flex items-center" ref={menuRef}>
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}

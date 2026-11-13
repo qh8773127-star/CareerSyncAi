@@ -1,14 +1,17 @@
-import CareerCoachPage from "@/app/components/CareerCoachPage";
+import CoachClientWrapper from "./CoachClientWrapper";
 import { Suspense } from "react";
 
-const CoachPage = () => {
+async function CoachPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ chatId?: string }>;
+}) {
+  const { chatId } = await searchParams;
   return (
-    <div>
-      <Suspense fallback={<div>Loading Chat...</div>}>
-        <CareerCoachPage />
-      </Suspense>
-    </div>
+    <Suspense fallback={<div className="flex h-screen items-center justify-center">Loading...</div>}>
+      <CoachClientWrapper initialChatId={chatId} />
+    </Suspense>
   );
-};
+}
 
 export default CoachPage;

@@ -1,6 +1,7 @@
 "use server";
 import { prisma } from "@/app/lib/prisma";
 import { requireAuth } from "@/app/actions/Job";
+import { revalidatePath } from "next/dist/server/web/spec-extension/revalidate";
 
 export async function getChatMessages(chatId: string) {
   const userId = await requireAuth();
@@ -40,5 +41,19 @@ export async function getUserChats() {
   } catch (error) {
     console.error("Failed to fetch user chats:", error);
     return [];
+  }
+}
+
+export async function deleteChat(chatId: string) {
+  try {
+    const userId = await requireAuth();
+    await prisma.chat.deleteMany({
+      where: { id: chatId, userId },
+    });
+    revalidatePath("/dashboard/coach");
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to delete chat:", error);
+    return { success: false, error: "Failed to delete chat" };
   }
 }
