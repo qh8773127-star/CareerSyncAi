@@ -103,12 +103,11 @@ export default function Sidebar({
 
   return (
     <aside
-      className={`
-      fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 text-slate-300 flex flex-col h-full border-r border-slate-800 shrink-0 transform transition-transform duration-300 ease-in-out
-      md:relative md:translate-x-0
+       className={`
+      fixed inset-y-0 left-0 z-100 w-64 bg-slate-900 text-slate-300 flex flex-col h-dvh border-r border-slate-800 shrink-0 transform transition-transform duration-300 ease-in-out
+      md:relative md:translate-x-0 md:h-full
       ${isOpen ? "translate-x-0" : "-translate-x-full"}
-    `}
-    >
+    `}>
       <div className="p-3 flex items-center justify-between md:block">
         <button
           onClick={onNewChat}

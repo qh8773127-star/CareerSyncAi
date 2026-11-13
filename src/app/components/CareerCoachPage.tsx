@@ -207,13 +207,9 @@ export default function CareerCoachPage({
             <h1 className="text-base md:text-lg font-bold text-slate-800">
               AI Career Coach
             </h1>
-            <p className="text-[10px] md:text-xs text-slate-500 font-medium hidden sm:block">
-              Powered by RAG & Groq
-            </p>
           </div>
         </div>
 
-        {/* Quota Display (Responsive) */}
         <div className="flex flex-col items-end">
           {usageCount !== null && (
             <span
