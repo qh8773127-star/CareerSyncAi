@@ -12,7 +12,7 @@ export default function CoachClientWrapper({
 }) {
   const router = useRouter();
   const [fallbackChatId] = useState(() => crypto.randomUUID());
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // 👈 Mobile Sidebar State
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const activeChatId = initialChatId || fallbackChatId;
 
@@ -25,28 +25,30 @@ export default function CoachClientWrapper({
   const handleNewChat = () => {
     const newId = crypto.randomUUID();
     router.push(`/dashboard/coach?chatId=${newId}`);
-    setIsSidebarOpen(false);
+    if (window.innerWidth < 768) setIsSidebarOpen(false);
   };
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] w-full overflow-hidden bg-white relative">
+    <div className="fixed inset-x-0 bottom-0 top-16 z-30 flex w-full overflow-hidden bg-white">
       {isSidebarOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-90 md:hidden transition-opacity"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
+
       <Sidebar
         currentChatId={activeChatId}
         onNewChat={handleNewChat}
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
       />
+
       <div className="flex-1 h-full flex flex-col min-w-0">
         <CareerCoachPage
           key={activeChatId}
           chatId={activeChatId}
-          onToggleSidebar={() => setIsSidebarOpen(true)}
+          onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
         />
       </div>
     </div>

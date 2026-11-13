@@ -133,7 +133,7 @@ export default async function DashboardPage({
                 <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6 shrink-0 mt-4 md:mt-0">
                   <JobActionButtons jobId={job.id} currentStatus={job.status} />
 
-                  <span className="text-sm text-slate-400 font-medium text-right min-w-[90px]">
+                  <span className="text-sm text-slate-400 font-medium text-right min-w-22.5">
                     {job.createdAt.toLocaleDateString("en-US", {
                       month: "short",
                       day: "numeric",
