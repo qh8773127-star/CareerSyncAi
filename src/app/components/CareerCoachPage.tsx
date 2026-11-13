@@ -82,7 +82,7 @@ const IconMenu = ({ className }: { className?: string }) => (
   >
     <path d="M4 12h16M4 6h16M4 18h16" />
   </svg>
-); // 👈 Hamburger Icon
+);
 
 const QUICK_PROMPTS = [
   "What are my top skills?",
@@ -92,7 +92,7 @@ const QUICK_PROMPTS = [
 
 interface CareerCoachPageProps {
   chatId: string;
-  onToggleSidebar: () => void; // 👈 Prop for mobile sidebar
+  onToggleSidebar: () => void;
 }
 
 export default function CareerCoachPage({
@@ -191,10 +191,8 @@ export default function CareerCoachPage({
 
   return (
     <div className="flex flex-col h-full bg-white relative">
-      {/* 🌟 Header: Fully Responsive */}
       <div className="flex items-center justify-between px-3 md:px-6 py-3 md:py-4 bg-white/80 backdrop-blur-md border-b border-slate-100 z-10 shrink-0">
         <div className="flex items-center gap-2 md:gap-3">
-          {/* Hamburger Menu (Sirf Mobile par nazar aayega) */}
           <button
             onClick={onToggleSidebar}
             className="md:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg"

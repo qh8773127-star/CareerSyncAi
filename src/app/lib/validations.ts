@@ -102,24 +102,25 @@ export type JobAnalysisResult = z.infer<typeof jobAnalysisSchema>;
 
 export const chatRequestSchema = z
   .object({
+    chatId: z.string().optional(),
     messages: z
       .array(
         z
           .object({
             id: z.string().optional(),
-            role: z.enum(["user", "assistant", "system"]),
+            role: z.enum(["user", "assistant", "system", "tool", "data"]),
             parts: z.array(
               z
                 .object({
                   type: z.string(),
-                  text: z.string().max(2000).optional(),
+                  text: z.string().max(2000).optional(), 
                 })
                 .passthrough(),
             ),
           })
           .passthrough(),
       )
-      .max(50),
+      .max(50), 
   })
   .passthrough();
 
@@ -171,5 +172,5 @@ export const ToolSchemaForDeleteJob = z.object({
 });
 
 export const ToolSchemaForDeleteAllJobs = z.object({
-confirmation: z.boolean()
+  confirmation: z.boolean(),
 });

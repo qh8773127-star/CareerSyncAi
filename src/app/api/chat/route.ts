@@ -50,6 +50,7 @@ export async function POST(req: Request) {
     const parseData = chatRequestSchema.safeParse(body);
 
     if (!parseData.success) {
+      console.error("ZOD VALIDATION ERROR:", parseData.error.format());
       return new Response(
         JSON.stringify({
           error: "Bad Requests. Please try again.",
