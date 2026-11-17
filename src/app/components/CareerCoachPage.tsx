@@ -190,51 +190,43 @@ export default function CareerCoachPage({
   const isLimitReached = usageCount !== null && usageCount >= maxLimit;
 
   return (
-    <div className="flex flex-col h-full bg-white relative">
-      <div className="absolute top-4 left-4 z-20 flex items-center gap-2">
-        <button
-          onClick={onToggleSidebar}
-          className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors bg-white/80 backdrop-blur-sm border border-slate-200 shadow-sm"
-        >
-          <IconPanelLeft className="w-5 h-5" />
-        </button>
-      </div>
-
-      <div className="absolute top-4 right-4 z-20">
+    <div className="flex flex-col h-full w-full bg-slate-50 relative">
+      <header className="flex items-center justify-between px-4 py-3 bg-white border-b border-slate-200 z-30 shrink-0">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={onToggleSidebar}
+            className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors "
+          >
+            <IconPanelLeft className="w-5 h-5" />
+          </button>
+        </div>
         {usageCount !== null && (
           <span
-            className={`text-xs md:text-sm font-semibold px-3 py-1.5 rounded-full shadow-sm ${
-              isLimitReached
-                ? "bg-red-50 text-red-600 border border-red-100"
-                : "bg-indigo-50 text-indigo-600 border border-indigo-100"
-            }`}
+            className={`text-xs font-semibold px-3 py-1.5 rounded-full border shadow-sm ${isLimitReached ? "bg-red-50 text-red-600 border-red-100" : "bg-indigo-50 text-indigo-600 border-indigo-100"}`}
           >
             {usageCount} / {maxLimit} Used
           </span>
         )}
-      </div>
-      <div className="flex-1 overflow-y-auto bg-white scroll-smooth">
+      </header>
+      <div className="flex-1 overflow-y-auto px-4 sm:px-6 pt-6 scroll-smooth">
         {isLoadingHistory ? (
-          <div className="h-full flex flex-col items-center justify-center space-y-4 pt-16">
+          <div className="h-full flex flex-col items-center justify-center space-y-4">
             <IconLoader className="w-8 h-8 text-indigo-500 animate-spin" />
           </div>
         ) : messages.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center text-center px-4 animate-in fade-in pt-16">
-            <div className="w-16 h-16 md:w-20 md:h-20 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mb-6 shadow-sm">
-              <IconSparkles className="w-8 h-8 md:w-10 md:h-10" />
+          <div className="h-full flex flex-col items-center justify-center text-center px-4 animate-in fade-in">
+            <div className="w-20 h-20 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mb-6">
+              <IconSparkles className="w-10 h-10" />
             </div>
-            <h2 className="text-2xl md:text-3xl font-bold text-slate-800 mb-2">
+            <h2 className="text-2xl font-bold text-slate-800 mb-2">
               How can I help you today?
             </h2>
-            <p className="text-sm md:text-base text-slate-500 max-w-md mb-8">
-              I know about your tracked jobs. Try asking me something specific.
-            </p>
-            <div className="flex flex-wrap justify-center gap-2 max-w-lg">
+            <div className="flex flex-wrap justify-center gap-2 max-w-lg mt-6">
               {QUICK_PROMPTS.map((prompt, i) => (
                 <button
                   key={i}
                   onClick={() => handleSend(prompt)}
-                  className="px-4 py-2 bg-slate-50 border border-slate-200 rounded-full text-sm text-slate-600 hover:border-indigo-300 hover:text-indigo-600 hover:shadow-sm transition-all"
+                  className="px-4 py-2 bg-white border border-slate-200 rounded-full text-sm text-slate-600 hover:border-indigo-300 hover:text-indigo-600 shadow-sm transition-all"
                 >
                   {prompt}
                 </button>
@@ -242,13 +234,11 @@ export default function CareerCoachPage({
             </div>
           </div>
         ) : (
-          <div className="space-y-6 pb-6 px-4 sm:px-6 max-w-4xl mx-auto pt-20">
+          <div className="space-y-6 max-w-3xl mx-auto pb-4">
             {messages.map((m) => (
               <div
                 key={m.id}
-                className={`flex gap-3 animate-in fade-in slide-in-from-bottom-2 ${
-                  m.role === "user" ? "justify-end" : "justify-start"
-                }`}
+                className={`flex gap-3 animate-in fade-in slide-in-from-bottom-2 ${m.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 {m.role === "assistant" && (
                   <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center shrink-0 mt-1 shadow-md">
@@ -256,11 +246,7 @@ export default function CareerCoachPage({
                   </div>
                 )}
                 <div
-                  className={`max-w-[85%] md:max-w-[75%] rounded-2xl px-5 py-3.5 shadow-sm ${
-                    m.role === "user"
-                      ? "bg-indigo-600 text-white rounded-tr-sm shadow-indigo-200"
-                      : "bg-white text-slate-800 border border-slate-200 rounded-tl-sm"
-                  }`}
+                  className={`max-w-[85%] rounded-2xl px-5 py-3.5 shadow-sm ${m.role === "user" ? "bg-indigo-600 text-white rounded-tr-sm" : "bg-white text-slate-800 border border-slate-200 rounded-tl-sm"}`}
                 >
                   <div className="text-[15px] leading-relaxed space-y-2">
                     {m.parts.map((part, i) =>
@@ -277,13 +263,12 @@ export default function CareerCoachPage({
                 )}
               </div>
             ))}
-
             {isLoading && messages[messages.length - 1]?.role === "user" && (
               <div className="flex gap-3 justify-start">
-                <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center shrink-0 mt-1 shadow-md">
+                <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center shrink-0 mt-1">
                   <IconBot className="w-5 h-5 text-white" />
                 </div>
-                <div className="max-w-[85%] rounded-2xl rounded-tl-sm px-5 py-4 bg-white border border-slate-200 shadow-sm flex items-center gap-3">
+                <div className="rounded-2xl rounded-tl-sm px-5 py-4 bg-white border border-slate-200 shadow-sm flex items-center gap-3">
                   <span className="text-sm text-slate-500 font-medium">
                     {THINKING_MESSAGES[thinkingIndex]}
                   </span>
@@ -305,16 +290,14 @@ export default function CareerCoachPage({
           </div>
         )}
       </div>
-
-      {/* ✅ FIX 4: Input area ki padding ko center align kiya taaki full width look aaye */}
-      <div className="p-3 md:p-4 bg-white z-10 shrink-0 border-t border-slate-100">
-        <div className="max-w-4xl mx-auto">
+      <div className="p-4 bg-linear-to-t from-slate-50 via-slate-50/90 to-transparent z-20 shrink-0 pt-10 -mt-10">
+        <div className="max-w-3xl mb-10 mx-auto">
           <form
             onSubmit={(e) => {
               e.preventDefault();
               handleSend(input);
             }}
-            className="relative flex items-end gap-2 bg-slate-50 border border-slate-300 rounded-2xl p-2 focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500 transition-all shadow-sm"
+            className="relative flex items-end gap-2 bg-white/70 backdrop-blur-md border border-slate-400 rounded-2xl p-2 focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500 transition-all"
           >
             <textarea
               ref={textareaRef}
@@ -331,7 +314,7 @@ export default function CareerCoachPage({
                 isLimitReached ? "Daily limit reached." : "Message AI Coach..."
               }
               disabled={isLoading || isLimitReached || usageCount === null}
-              className="flex-1 max-h-40 bg-transparent resize-none outline-none text-slate-800 placeholder:text-slate-400 px-3 py-2.5 text-[15px] disabled:cursor-not-allowed"
+              className="flex-1 max-h-40 bg-transparent resize-none outline-none text-slate-800 placeholder:text-slate-500 px-3 py-2.5 text-[15px] disabled:cursor-not-allowed"
             />
             <button
               type="submit"
@@ -341,7 +324,7 @@ export default function CareerCoachPage({
                 isLimitReached ||
                 usageCount === null
               }
-              className="shrink-0 w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center hover:bg-indigo-700 disabled:opacity-30 disabled:cursor-not-allowed mb-0.5 mr-0.5 shadow-md"
+              className="shrink-0 w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center hover:bg-indigo-700 disabled:opacity-30 disabled:cursor-not-allowed mb-0.5 mr-0.5 transition-colors"
             >
               {isLoading ? (
                 <IconLoader className="w-5 h-5 animate-spin" />
@@ -350,10 +333,10 @@ export default function CareerCoachPage({
               )}
             </button>
           </form>
-          <p className="text-center text-[11px] text-slate-400 mt-2 font-medium">
-            AI Coach can make mistakes. Verify important info.
-          </p>
         </div>
+      <p className="text-center text-[11px] text-slate-400 mt-2 font-medium">
+        AI Coach can make mistakes.
+      </p>
       </div>
     </div>
   );
