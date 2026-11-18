@@ -94,7 +94,6 @@ async function runCase(
 
       let runFailed = false;
 
-      // Field comparisons
       for (const field of FIELDS_TO_CHECK) {
         if (expected[field] !== actual[field]) {
           runFailed = true;
@@ -110,7 +109,6 @@ async function runCase(
         }
       }
 
-      // Skills comparison
       if (!compareSkills(expected.skills||[], actual.skills||[])) {
         runFailed = true;
         const { missing, extra } = diffSkills(expected.skills||[], actual.skills||[]);
@@ -132,11 +130,9 @@ async function runCase(
       }
     }
 
-    // Rate limit guard between runs
     await new Promise((r) => setTimeout(r, DELAY_BETWEEN_RUNS_MS));
   }
 
-  // Classify case
   if (result.errors > 0 && result.passed === 0) {
     result.status = "error";
   } else if (result.passed === result.runs) {
@@ -169,8 +165,6 @@ async function runEvals() {
 
     const result = await runCase(file, casesDir);
     results.push(result);
-
-    // Status badge
     if (result.status === "stable-pass") {
       console.log(`✅ STABLE PASS (${result.passed}/${result.runs})`);
     } else if (result.status === "flaky") {
@@ -183,8 +177,6 @@ async function runEvals() {
       console.log(`❌ STABLE FAIL (${result.failed}/${result.runs} failed)`);
       result.details.forEach((d) => console.log(d));
     }
-
-    // Rate limit guard between cases
     await new Promise((r) => setTimeout(r, DELAY_BETWEEN_CASES_MS));
   }
 
@@ -231,8 +223,6 @@ async function runEvals() {
         console.log(`  ${field.padEnd(20)} ${count} failures`);
       });
   }
-
-  // Flaky cases list
   if (flaky > 0) {
     console.log(`\n⚠️  FLAKY CASES (non-deterministic output)`);
     console.log(`${"─".repeat(60)}`);
@@ -243,7 +233,6 @@ async function runEvals() {
       });
   }
 
-  // CI gate
   const threshold = 80;
   const pass = parseFloat(overallScore) >= threshold && flaky === 0;
 
