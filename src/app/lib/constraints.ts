@@ -42,3 +42,14 @@ export const THINKING_MESSAGES = [
   "Reviewing...",
   "Crafting...",
 ];
+
+export const QUICK_PROMPTS = [
+  "What are my top skills?",
+  "Show me React jobs",
+  "How is my application looking?",
+];
+
+export interface CareerCoachPageProps {
+  chatId: string;
+  onToggleSidebar: () => void;
+}

@@ -55,18 +55,37 @@ export async function retrieveRelevantJobs(userId: string, query: string) {
 
     const formattedEmbedding = `[${embedding.join(",")}]`;
     const relevantJobs = await prisma.$queryRaw<RetrievedJob[]>`
+      WITH vector_search AS (
+        SELECT id, 
+               ROW_NUMBER() OVER (ORDER BY embedding <-> ${formattedEmbedding}::vector) as rank_vector
+        FROM "Job"
+        WHERE "userId" = ${userId} AND embedding IS NOT NULL
+        LIMIT 10
+      ),
+      keyword_search AS (
+        SELECT id, 
+               ROW_NUMBER() OVER (
+                 ORDER BY ts_rank(to_tsvector('english', title || ' ' || company || ' ' || COALESCE(summary, '')), plainto_tsquery('english', ${query})) DESC
+               ) as rank_keyword
+        FROM "Job"
+        WHERE "userId" = ${userId} 
+          AND to_tsvector('english', title || ' ' || company || ' ' || COALESCE(summary, '')) @@ plainto_tsquery('english', ${query})
+        LIMIT 10
+      )
       SELECT 
-        id, 
-        title, 
-        company, 
-        summary, 
-        skills,
-        1 - (embedding <-> ${formattedEmbedding}::vector) AS similarity
-      FROM "Job"
-      WHERE "userId" = ${userId} 
-        AND embedding IS NOT NULL
-      ORDER BY embedding <-> ${formattedEmbedding}::vector
-      LIMIT 3;
+        j.id, 
+        j.title, 
+        j.company, 
+        j.summary, 
+        j.skills,
+        COALESCE(1.0 / (60 + v.rank_vector), 0.0) + 
+        COALESCE(1.0 / (60 + k.rank_keyword), 0.0) AS similarity
+      FROM "Job" j
+      LEFT JOIN vector_search v ON j.id = v.id
+      LEFT JOIN keyword_search k ON j.id = k.id
+      WHERE v.id IS NOT NULL OR k.id IS NOT NULL
+      ORDER BY similarity DESC
+      LIMIT 5;
     `;
 
     return relevantJobs;

@@ -8,6 +8,8 @@ import { toast } from "sonner";
 import { getApiLimitCount } from "@/app/lib/quota";
 import { MAX_CHATS, THINKING_MESSAGES } from "../lib/constraints";
 import { getChatMessages } from "../actions/chat";
+import { QUICK_PROMPTS } from "../lib/constraints";
+import { CareerCoachPageProps } from "../lib/constraints";
 
 const IconLoader = ({ className }: { className?: string }) => (
   <svg
@@ -83,17 +85,6 @@ const IconPanelLeft = ({ className }: { className?: string }) => (
     <path d="M9 3v18" />
   </svg>
 );
-
-const QUICK_PROMPTS = [
-  "What are my top skills?",
-  "Show me React jobs",
-  "How is my application looking?",
-];
-
-interface CareerCoachPageProps {
-  chatId: string;
-  onToggleSidebar: () => void;
-}
 
 export default function CareerCoachPage({
   chatId,
