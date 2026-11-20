@@ -71,7 +71,7 @@ export async function retrieveRelevantJobs(userId: string, query: string) {
         SELECT id, ROW_NUMBER() OVER (
           ORDER BY ts_rank(
             to_tsvector('english', title || ' ' || company || ' ' || COALESCE(summary, '') || ' ' || COALESCE(array_to_string(skills, ' '), '')), 
-            plainto_tsquery('english', ${query})
+            to_tsquery('english', regexp_replace(plainto_tsquery('english', ${query})::text, '&', '|', 'g'))
           ) DESC
         ) as rank_keyword
         FROM "Job" 
@@ -108,7 +108,7 @@ export async function retrieveRelevantJobs(userId: string, query: string) {
       });
 
       const finalJobs = rerankResponse.results
-        .filter((result) => result.relevanceScore >= 0.15)
+        .filter((result) => result.relevanceScore >= 0.05)
         .map((result) => ({
           ...initialJobs[result.index],
           similarity: result.relevanceScore,
