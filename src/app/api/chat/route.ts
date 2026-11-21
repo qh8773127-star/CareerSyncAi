@@ -21,6 +21,12 @@ import { consumeQuota, refundQuota } from "@/app/lib/quota";
 import { NextResponse } from "next/server";
 import { retrieveRelevantJobs } from "@/app/lib/rag";
 import { prisma } from "@/app/lib/prisma";
+import { langfuseSpanProcessor } from "@/app/lib/langfuse";
+import {
+  propagateAttributes,
+  startActiveObservation,
+  startObservation,
+} from "@langfuse/tracing";
 
 const ratelimit = new Ratelimit({
   redis: redis,
@@ -30,6 +36,7 @@ const ratelimit = new Ratelimit({
 export async function POST(req: Request) {
   const userId = await requireAuth();
   const requestId = crypto.randomUUID();
+
   try {
     const { success } = await ratelimit.limit(userId);
 
@@ -46,7 +53,6 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-
     const parseData = chatRequestSchema.safeParse(body);
 
     if (!parseData.success) {
@@ -72,7 +78,6 @@ export async function POST(req: Request) {
     }
 
     const messages = parseData.data.messages as UIMessage[];
-
     const chatId = body.chatId || crypto.randomUUID();
 
     const lastMessage = messages[messages.length - 1];
@@ -85,6 +90,7 @@ export async function POST(req: Request) {
         .map((p) => p.text)
         .join(" ");
     }
+
     if (userQuery.trim() !== "") {
       await prisma.chat.upsert({
         where: { id: chatId },
@@ -99,47 +105,85 @@ export async function POST(req: Request) {
       userQuery = "Show me my recently saved jobs";
     }
 
-    const relevantJobs = await retrieveRelevantJobs(userId, userQuery);
-    let contextText = "No relevant jobs found in the user's database.";
-    if (relevantJobs.length > 0) {
-      contextText = relevantJobs
-        .map(
-          (job) =>
-            `- Job: ${job.title} at ${job.company}\n  Summary: ${job.summary || "N/A"}\n  Skills: ${job.skills.join(", ")}`,
-        )
-        .join("\n\n");
-    }
-
-    const result = await streamText({
-      model: groq("openai/gpt-oss-120b"),
-      messages: await convertToModelMessages(messages),
-      system: CAREERSYNC_SYSTEM_PROMPT(contextText),
-
-      tools: {
-        updateJobStatus,
-        addJobApplication,
-        deleteSpecificJob,
-        deleteAllJobs,
+    return await propagateAttributes(
+      {
+        userId,
+        sessionId: chatId,
       },
+      async () => {
+        return await startActiveObservation(
+          "careersync-rag-chat",
+          async (rootSpan) => {
+            rootSpan.update({ input: userQuery });
 
-      stopWhen: stepCountIs(3),
+            const relevantJobs = await retrieveRelevantJobs(userId, userQuery);
+            let contextText = "No relevant jobs found in the user's database.";
+            if (relevantJobs.length > 0) {
+              contextText = relevantJobs
+                .map(
+                  (job) =>
+                    `- Job: ${job.title} at ${job.company}\n  Summary: ${job.summary || "N/A"}\n  Skills: ${job.skills.join(", ")}`,
+                )
+                .join("\n\n");
+            }
 
-      onFinish: async ({ text }) => {
-        try {
-          await prisma.message.create({
-            data: { chatId, role: "assistant", content: text },
-          });
-        } catch (error) {
-          console.error("Failed to save AI message:", error);
-        }
+            const llmStartTime = new Date();
+
+            const result = await streamText({
+              model: groq("openai/gpt-oss-120b"),
+              messages: await convertToModelMessages(messages),
+              system: CAREERSYNC_SYSTEM_PROMPT(contextText),
+              tools: {
+                updateJobStatus,
+                addJobApplication,
+                deleteSpecificJob,
+                deleteAllJobs,
+              },
+              stopWhen: stepCountIs(3),
+              onFinish: async ({ text, usage }) => {
+                try {
+                  await prisma.message.create({
+                    data: { chatId, role: "assistant", content: text },
+                  });
+
+                  const generation = startObservation(
+                    "groq-chat-completion",
+                    {
+                      model: "openai/gpt-oss-120b",
+                      input: {
+                        systemContext: contextText,
+                        userQuery,
+                      },
+                      output: text,
+                      usageDetails: {
+                        input: usage?.inputTokens ?? 0,
+                        output: usage?.outputTokens ?? 0,
+                      },
+                    },
+                    { asType: "generation", startTime: llmStartTime },
+                  );
+                  generation.end();
+
+                  rootSpan.update({ output: text });
+                  await langfuseSpanProcessor.forceFlush();
+                } catch (error) {
+                  console.error(
+                    "Failed to save AI message or flush trace:",
+                    error,
+                  );
+                }
+              },
+            });
+
+            return result.toUIMessageStreamResponse({
+              headers: {
+                "x-chat-id": chatId,
+              },
+            });
+          },
+        );
       },
-    });
-
-    return result.toUIMessageStreamResponse({
-      headers: {
-        "x-chat-id": chatId,
-      },
-    });
+    );
   } catch (error) {
     if (error instanceof AppError) {
       await refundQuota(requestId);
