@@ -122,7 +122,7 @@ export async function POST(req: Request) {
               contextText = relevantJobs
                 .map(
                   (job) =>
-                    `- Job: ${job.title} at ${job.company}\n  Summary: ${job.summary || "N/A"}\n  Skills: ${job.skills.join(", ")}`,
+                    `- Job: ${job.title} at ${job.company}\n  Status: ${job.status || "PENDING"}\n  Location: ${job.location || "Not Specified"}\n  Summary: ${job.summary || "N/A"}\n  Skills: ${job.skills.join(", ")}`,
                 )
                 .join("\n\n");
             }

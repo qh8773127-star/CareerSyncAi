@@ -34,8 +34,18 @@ export type RetrievedJob = {
   summary: string | null;
   skills: string[];
   similarity: number;
+  status: string | null;
+  location: string | null;
 };
 
+export interface JobforJudge {
+  title: string;
+  company: string;
+  skills?: string[] | null;
+  summary?: string | null;
+  status?: string | null;   
+  location?: string | null; 
+}
 export const THINKING_MESSAGES = [
   "Thinking...",
   "Analyzing...",

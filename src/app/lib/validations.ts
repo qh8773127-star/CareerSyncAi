@@ -174,3 +174,20 @@ export const ToolSchemaForDeleteJob = z.object({
 export const ToolSchemaForDeleteAllJobs = z.object({
   confirmation: z.boolean(),
 });
+
+export const JudgeSchema = z.object({
+  score: z
+    .number()
+    .describe(
+      "Relevance score between 0.0 (completely irrelevant) and 1.0 (perfect match)",
+    ),
+  reasoning: z
+    .string()
+    .describe("Brief explanation of why this score was given"),
+  relevantJobsCount: z
+    .number()
+    .int()
+    .describe(
+      "Integer count of how many of the provided jobs are actually relevant to the query",
+    ),
+});

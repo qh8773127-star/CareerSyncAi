@@ -69,73 +69,108 @@ export async function retrieveRelevantJobs(
   const jobs = await startActiveObservation(
     "hybrid-rerank-retrieval",
     async (span): Promise<RetrievedJob[]> => {
-      try {
-        const { embedding } = await embed({
-          model: google.textEmbeddingModel("gemini-embedding-001"),
-          value: cleanQuery,
-          providerOptions: { google: { outputDimensionality: 1536 } },
-          experimental_telemetry: {
-            isEnabled: true,
-            functionId: "rag-query-embedding",
-          },
-        });
+      let formattedEmbedding: string | null = null;
+      let embeddingApiFailed = false;
 
-        if (!embedding || embedding.length === 0) {
+      try {
+        try {
+          const { embedding } = await embed({
+            model: google.textEmbeddingModel("gemini-embedding-001"),
+            value: cleanQuery,
+            providerOptions: { google: { outputDimensionality: 1536 } },
+            experimental_telemetry: {
+              isEnabled: true,
+              functionId: "rag-query-embedding",
+            },
+          });
+
+          if (embedding && embedding.length > 0) {
+            formattedEmbedding = `[${embedding.join(",")}]`;
+          } else {
+            embeddingApiFailed = true;
+          }
+        } catch (apiError) {
+          embeddingApiFailed = true;
+          console.warn(
+            "⚠️ Embedding API Failed. Falling back to Keyword Search only.",
+            apiError instanceof Error ? apiError.message : "Unknown error",
+          );
           span.update({
             level: "WARNING",
-            statusMessage: "Empty embedding returned",
-            input: { query: cleanQuery },
-            output: [],
+            statusMessage:
+              "Embedding API failed, falling back to keyword search.",
           });
-          return [];
         }
 
-        const formattedEmbedding = `[${embedding.join(",")}]`;
-
-        const initialJobs = await prisma.$queryRaw<RetrievedJob[]>`
-          WITH parsed_query AS (
-            SELECT regexp_replace(plainto_tsquery('english', ${cleanQuery})::text, '&', '|', 'g') AS ts_q
-          ),
-          vector_search AS (
-            SELECT id, ROW_NUMBER() OVER (ORDER BY embedding <-> ${formattedEmbedding}::vector) AS rank_vector
-            FROM "Job" 
-            WHERE "userId" = ${userId} AND embedding IS NOT NULL 
-            LIMIT 15
-          ),
-          keyword_search AS (
-            SELECT j.id, ROW_NUMBER() OVER (
-              ORDER BY ts_rank(
-                to_tsvector('english', j.title || ' ' || j.company || ' ' || COALESCE(j.summary, '') || ' ' || COALESCE(array_to_string(j.skills, ' '), '')), 
-                to_tsquery('english', pq.ts_q)
-              ) DESC
-            ) AS rank_keyword
+        let initialJobs: RetrievedJob[] = [];
+        if (!embeddingApiFailed && formattedEmbedding) {
+          initialJobs = await prisma.$queryRaw<RetrievedJob[]>`
+            WITH parsed_query AS (
+              SELECT regexp_replace(plainto_tsquery('english', ${cleanQuery})::text, '&', '|', 'g') AS ts_q
+            ),
+            vector_search AS (
+              SELECT id, ROW_NUMBER() OVER (ORDER BY embedding <-> ${formattedEmbedding}::vector) AS rank_vector
+              FROM "Job" 
+              WHERE "userId" = ${userId} AND embedding IS NOT NULL 
+              LIMIT 15
+            ),
+            keyword_search AS (
+              SELECT j.id, ROW_NUMBER() OVER (
+                ORDER BY ts_rank(
+                  to_tsvector('english', j.title || ' ' || j.company || ' ' || COALESCE(j.summary, '') || ' ' || COALESCE(array_to_string(j.skills, ' '), '')), 
+                  to_tsquery('english', pq.ts_q)
+                ) DESC
+              ) AS rank_keyword
+              FROM "Job" j
+              CROSS JOIN parsed_query pq
+              WHERE j."userId" = ${userId}
+                AND pq.ts_q <> ''
+                AND to_tsvector('english', j.title || ' ' || j.company || ' ' || COALESCE(j.summary, '') || ' ' || COALESCE(array_to_string(j.skills, ' '), '')) 
+                @@ to_tsquery('english', pq.ts_q)
+              LIMIT 15
+            )
+            SELECT j.id, j.title, j.company, j.summary, j.skills, j.status, j.location,
+              COALESCE(1.0 / (60 + v.rank_vector), 0.0) + COALESCE(1.0 / (60 + k.rank_keyword), 0.0) AS similarity
+            FROM "Job" j
+            LEFT JOIN vector_search v ON j.id = v.id
+            LEFT JOIN keyword_search k ON k.id = j.id
+            WHERE v.id IS NOT NULL OR k.id IS NOT NULL
+            ORDER BY similarity DESC 
+            LIMIT 15;
+          `;
+        } else {
+          initialJobs = await prisma.$queryRaw<RetrievedJob[]>`
+            WITH parsed_query AS (
+              SELECT regexp_replace(plainto_tsquery('english', ${cleanQuery})::text, '&', '|', 'g') AS ts_q
+            )
+            SELECT j.id, j.title, j.company, j.summary, j.skills, j.status, j.location,
+                   ts_rank(
+                     to_tsvector('english', j.title || ' ' || j.company || ' ' || COALESCE(j.summary, '') || ' ' || COALESCE(array_to_string(j.skills, ' '), '')), 
+                     to_tsquery('english', pq.ts_q)
+                   ) AS similarity
             FROM "Job" j
             CROSS JOIN parsed_query pq
             WHERE j."userId" = ${userId}
               AND pq.ts_q <> ''
               AND to_tsvector('english', j.title || ' ' || j.company || ' ' || COALESCE(j.summary, '') || ' ' || COALESCE(array_to_string(j.skills, ' '), '')) 
               @@ to_tsquery('english', pq.ts_q)
-            LIMIT 15
-          )
-          SELECT j.id, j.title, j.company, j.summary, j.skills,
-            COALESCE(1.0 / (60 + v.rank_vector), 0.0) + COALESCE(1.0 / (60 + k.rank_keyword), 0.0) AS similarity
-          FROM "Job" j
-          LEFT JOIN vector_search v ON j.id = v.id
-          LEFT JOIN keyword_search k ON k.id = j.id
-          WHERE v.id IS NOT NULL OR k.id IS NOT NULL
-          ORDER BY similarity DESC 
-          LIMIT 15;
-        `;
+            ORDER BY similarity DESC
+            LIMIT 15;
+          `;
+        }
 
         if (initialJobs.length === 0) {
           span.update({
             input: { query: cleanQuery },
             output: [],
-            metadata: { initialJobsFound: 0, rerankUsed: false },
+            metadata: {
+              initialJobsFound: 0,
+              rerankUsed: false,
+              embeddingApiFailed,
+            },
           });
           return [];
         }
-
         if (!process.env.COHERE_API_KEY) {
           const fallback = initialJobs.slice(0, 3);
           span.update({
@@ -149,6 +184,7 @@ export async function retrieveRelevantJobs(
             metadata: {
               initialJobsFound: initialJobs.length,
               rerankUsed: false,
+              embeddingApiFailed,
             },
           });
           return fallback;
@@ -167,16 +203,18 @@ export async function retrieveRelevantJobs(
             topN: Math.min(3, documentsToRerank.length),
           });
 
-          const finalJobs = rerankResponse.results
-            .filter(
-              (result) =>
-                result.relevanceScore >= 0.05 &&
-                Boolean(initialJobs[result.index]),
-            )
+          const allRerankedJobs = rerankResponse.results
+            .filter((result) => Boolean(initialJobs[result.index]))
             .map((result) => ({
               ...initialJobs[result.index],
-              similarity: result.relevanceScore,
+              similarity: Math.max(0, Math.min(1, result.relevanceScore)),
             }));
+          let finalJobs = allRerankedJobs.filter(
+            (job) => job.similarity >= 0.1,
+          );
+          if (finalJobs.length === 0 && allRerankedJobs.length > 0) {
+            finalJobs = allRerankedJobs;
+          }
 
           span.update({
             input: { query: cleanQuery },
@@ -190,6 +228,7 @@ export async function retrieveRelevantJobs(
               initialJobsFound: initialJobs.length,
               rerankUsed: true,
               topRerankScore: finalJobs[0]?.similarity ?? 0,
+              embeddingApiFailed,
             },
           });
 
@@ -213,6 +252,7 @@ export async function retrieveRelevantJobs(
               initialJobsFound: initialJobs.length,
               rerankUsed: false,
               rerankError: true,
+              embeddingApiFailed,
             },
           });
           return fallback;
